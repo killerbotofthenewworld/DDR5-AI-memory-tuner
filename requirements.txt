@@ -9,3 +9,16 @@ pydantic>=1.9.0
 pytest>=6.0.0
 black>=22.0.0
 flake8>=4.0.0
+
+# Advanced AI Dependencies
+torch>=2.0.0
+optuna>=3.0.0
+xgboost>=2.0.0
+lightgbm>=4.0.0
+transformers>=4.20.0
+
+# Additional AI/ML Libraries
+tensorboard>=2.12.0
+scikit-optimize>=0.9.0
+hyperopt>=0.2.7
+bayesian-optimization>=1.4.0

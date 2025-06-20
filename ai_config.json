@@ -1,0 +1,5 @@
+{
+  "online_learning": true,
+  "adaptation_rate": 0.01,
+  "version": "2.0.0"
+}
