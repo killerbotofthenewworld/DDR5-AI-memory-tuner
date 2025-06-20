@@ -94,7 +94,7 @@ class GradualTuner:
 
 ## 🆕 **What's Available Now**
 
-### ✅ **Immediate Features (v3.1)**
+### ✅ **Current Features (v5.0 Revolutionary AI)**
 1. **Enhanced Hardware Detection**
    - Better voltage, serial, part number detection
    - Expanded Kingston Fury database (5 new models)

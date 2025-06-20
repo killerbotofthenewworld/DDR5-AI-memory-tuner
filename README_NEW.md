@@ -21,7 +21,7 @@ Fine-tune DDR5 memory configurations without physical hardware using revolutiona
 
 ```bash
 # Clone and run
-git clone https://github.com/your-username/ddr5-ai-sandbox-simulator.git
+git clone https://github.com/killerbotofthenewworld/ddr5-ai-sandbox-simulator.git
 cd ddr5-ai-sandbox-simulator
 pip install -r requirements.txt
 streamlit run main.py
@@ -62,12 +62,15 @@ streamlit run main.py
 
 ## 🌟 Latest Updates (June 2025)
 
-### 🚀 Version 3.0 - Revolutionary AI Release
+### 🚀 Version 5.0 - Revolutionary AI Engine Release
 
-#### 🧠 Perfect AI Optimizer
-- **Ensemble Learning**: Random Forest, XGBoost, Neural Networks, SVM
-- **Advanced Feature Engineering**: 15+ performance indicators
-- **Real-time Optimization**: Sub-second configuration generation
+#### 🧠 Advanced AI Engine
+- **Transformer Neural Networks**: Multi-head attention mechanisms for complex parameter relationships
+- **Quantum-Inspired Optimization**: Superposition states and quantum tunneling for global optimization
+- **Reinforcement Learning**: PPO (Proximal Policy Optimization) with continuous policy improvement
+- **Advanced Ensemble Methods**: XGBoost, LightGBM, Random Forest, Gradient Boosting & MLP
+- **Hyperparameter Optimization**: Optuna's Tree-structured Parzen Estimator (TPE)
+- **Explainable AI**: Detailed insights, risk assessment, and transparent recommendations
 - **Confidence Scoring**: Reliability metrics for each recommendation
 
 #### 🔬 Quantum-Inspired Features
@@ -116,7 +119,7 @@ streamlit run main.py
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/your-username/ddr5-ai-sandbox-simulator.git
+git clone https://github.com/killerbotofthenewworld/ddr5-ai-sandbox-simulator.git
 cd ddr5-ai-sandbox-simulator
 
 # 2. Create virtual environment (recommended)
@@ -290,8 +293,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Contact
 
-- **Project**: [GitHub Repository](https://github.com/your-username/ddr5-ai-sandbox-simulator)
-- **Issues**: [Bug Reports](https://github.com/your-username/ddr5-ai-sandbox-simulator/issues)
+- **Project**: [GitHub Repository](https://github.com/killerbotofthenewworld/ddr5-ai-sandbox-simulator)
+- **Issues**: [Bug Reports](https://github.com/killerbotofthenewworld/ddr5-ai-sandbox-simulator/issues)
 - **Support**: [Ko-fi](https://ko-fi.com/killerbotofthenewworld)
 
 ---

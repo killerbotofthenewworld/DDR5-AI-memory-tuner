@@ -55,7 +55,7 @@ Your DDR5 AI Sandbox Simulator is now fully prepared for open-source release!
 cd /home/dylan/Downloads/ddr5
 
 # Add GitHub remote (replace YOUR_USERNAME with your GitHub username)
-git remote add origin https://github.com/YOUR_USERNAME/ddr5-ai-sandbox-simulator.git
+git remote add origin https://github.com/killerbotofthenewworld/ddr5-ai-sandbox-simulator.git
 
 # Push to GitHub
 git push -u origin main

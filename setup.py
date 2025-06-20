@@ -33,7 +33,7 @@ setup(
     description="The Ultimate AI-Powered DDR5 Memory Tuning Simulator Without Hardware Requirements",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/DDR5-AI-Sandbox/ddr5-ai-sandbox-simulator",
+    url="https://github.com/killerbotofthenewworld/ddr5-ai-sandbox-simulator",
     packages=find_packages(),
     classifiers=[
         "Development Status :: 4 - Beta",
@@ -64,9 +64,9 @@ setup(
     },
     keywords="ddr5 memory tuning ai optimization simulator hardware",
     project_urls={
-        "Bug Reports": "https://github.com/DDR5-AI-Sandbox/ddr5-ai-sandbox-simulator/issues",
-        "Source": "https://github.com/DDR5-AI-Sandbox/ddr5-ai-sandbox-simulator",
-        "Documentation": "https://github.com/DDR5-AI-Sandbox/ddr5-ai-sandbox-simulator#readme",
+        "Bug Reports": "https://github.com/killerbotofthenewworld/ddr5-ai-sandbox-simulator/issues",
+        "Source": "https://github.com/killerbotofthenewworld/ddr5-ai-sandbox-simulator",
+        "Documentation": "https://github.com/killerbotofthenewworld/ddr5-ai-sandbox-simulator#readme",
         "Ko-fi": "https://ko-fi.com/killerbotofthenewworld",
     },
 )
