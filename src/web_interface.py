@@ -9,9 +9,9 @@ import plotly.express as px
 import pandas as pd
 from typing import Dict, Any
 
-from ddr5_models import (DDR5Configuration, DDR5TimingParameters, 
+from .ddr5_models import (DDR5Configuration, DDR5TimingParameters, 
                          DDR5VoltageParameters)
-from ddr5_simulator import DDR5Simulator
+from .ddr5_simulator import DDR5Simulator
 from ai_optimizer import AdvancedAIOptimizer
 
 

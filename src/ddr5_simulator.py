@@ -5,7 +5,7 @@ Core simulation engine for DDR5 memory behavior and performance.
 
 import numpy as np
 from typing import Dict, List, Tuple, Optional
-from ddr5_models import DDR5Configuration, DDR5TimingParameters, DDR5VoltageParameters
+from .ddr5_models import DDR5Configuration, DDR5TimingParameters, DDR5VoltageParameters
 
 
 class DDR5Simulator:

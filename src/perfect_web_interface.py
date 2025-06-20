@@ -11,14 +11,14 @@ import numpy as np
 from typing import Dict, Any
 import time
 
-from ddr5_models import (DDR5Configuration, DDR5TimingParameters, 
+from .ddr5_models import (DDR5Configuration, DDR5TimingParameters, 
                          DDR5VoltageParameters)
-from ddr5_simulator import DDR5Simulator
-from perfect_ai_optimizer import PerfectDDR5Optimizer
-from hardware_detection import detect_system_memory, get_system_summary
-from ram_database import get_database, DDR5ModuleSpec
-from cross_brand_tuner import CrossBrandOptimizer, generate_cross_brand_report
-from live_tuning_safety import (LiveTuningSafetyValidator, LiveTuningSafetyReport, 
+from .ddr5_simulator import DDR5Simulator
+from .perfect_ai_optimizer import PerfectDDR5Optimizer
+from .hardware_detection import detect_system_memory, get_system_summary
+from .ram_database import get_database, DDR5ModuleSpec
+from .cross_brand_tuner import CrossBrandOptimizer, generate_cross_brand_report
+from .live_tuning_safety import (LiveTuningSafetyValidator, LiveTuningSafetyReport, 
                                SafetyLevel as SafetyLevelEnum, quick_safety_check)
 # from live_tuner import LiveTuner  # TODO: Add live tuning capability
 
@@ -204,10 +204,11 @@ def create_perfect_web_interface():
                 st.session_state.preset_config = "extreme"
     
     # Main content area with tabs
-    tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9 = st.tabs([
+    tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10 = st.tabs([
         "⚙️ Manual Tuning",
         "🎯 Simulation", 
         "🧠 AI Optimization", 
+        "🎮 Gaming Performance",
         "📊 Analysis", 
         "🔬 Revolutionary Features",
         "📈 Benchmarks",
@@ -723,8 +724,121 @@ def create_perfect_web_interface():
                 - Pattern Recognition
                 """)
     
-    # Tab 4: Analysis
+    # Tab 4: Gaming Performance (NEW)
     with tab4:
+        st.header("🎮 Gaming Performance Predictor")
+        st.info("🎯 **Real-World Gaming**: See how your DDR5 configuration affects actual gaming performance")
+        
+        # Import gaming performance predictor
+        try:
+            from .gaming_performance import GamingPerformancePredictor
+            gaming_predictor = GamingPerformancePredictor()
+            
+            # Get current configuration
+            if hasattr(st.session_state, 'manual_config') and st.session_state.manual_config:
+                gaming_config = st.session_state.manual_config
+            elif enable_manual:
+                gaming_config = DDR5Configuration(
+                    frequency=frequency,
+                    timings=DDR5TimingParameters(
+                        cl=cl, trcd=trcd, trp=trp, tras=tras, trc=trc, trfc=trfc
+                    ),
+                    voltages=DDR5VoltageParameters(vddq=vddq, vpp=vpp)
+                )
+            else:
+                gaming_config = create_preset_config(frequency, capacity, rank_count)
+            
+            # Resolution selector
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                resolution = st.selectbox("Resolution", ["1080p", "1440p", "4k"], index=0)
+            with col2:
+                show_competitive = st.checkbox("Focus on Competitive Games", value=True)
+            with col3:
+                show_improvements = st.checkbox("Show Memory Impact", value=True)
+            
+            # Get gaming predictions
+            gaming_results = gaming_predictor.predict_gaming_performance(gaming_config, resolution)
+            gaming_score = gaming_predictor.calculate_gaming_score(gaming_config)
+            recommendations = gaming_predictor.get_gaming_recommendations(gaming_config)
+            
+            # Display overall gaming score
+            st.metric("🏆 Overall Gaming Score", f"{gaming_score:.1f}/100", 
+                     delta="Optimized for gaming" if gaming_score > 85 else "Room for improvement")
+            
+            # Filter games if competitive focus is enabled
+            if show_competitive:
+                competitive_games = ["valorant", "counter_strike_2", "call_of_duty_warzone", 
+                                   "apex_legends", "overwatch_2", "league_of_legends"]
+                filtered_results = {k: v for k, v in gaming_results.items() if k in competitive_games}
+            else:
+                filtered_results = gaming_results
+            
+            # Display gaming results
+            st.subheader(f"🎮 Gaming Performance @ {resolution.upper()}")
+            
+            # Create columns for game results
+            cols = st.columns(3)
+            col_idx = 0
+            
+            for game_id, result in filtered_results.items():
+                with cols[col_idx % 3]:
+                    # Color code based on FPS
+                    if result["fps"] >= 144:
+                        fps_color = "🟢"
+                    elif result["fps"] >= 60:
+                        fps_color = "🟡"
+                    else:
+                        fps_color = "🔴"
+                    
+                    st.markdown(f"**{fps_color} {result['game_name']}**")
+                    st.markdown(f"**{result['fps']:.0f} FPS** ({result['frame_time_ms']:.1f}ms)")
+                    st.markdown(f"1% Low: {result['one_percent_low']:.0f} FPS")
+                    
+                    if show_improvements and result['memory_improvement_percent'] > 0:
+                        st.markdown(f"📈 +{result['memory_improvement_percent']:.1f}% vs baseline")
+                    
+                    if result['cpu_limited']:
+                        st.markdown("⚠️ CPU Limited")
+                    
+                    st.markdown("---")
+                
+                col_idx += 1
+            
+            # Gaming recommendations
+            if recommendations:
+                st.subheader("🎯 Gaming Optimization Recommendations")
+                for category, recommendation in recommendations.items():
+                    st.info(recommendation)
+            
+            # Gaming-focused configuration suggestions
+            st.subheader("🚀 Gaming-Optimized Presets")
+            
+            preset_cols = st.columns(3)
+            
+            with preset_cols[0]:
+                if st.button("🏆 Competitive Gaming", use_container_width=True):
+                    # High frequency, tight timings for competitive
+                    st.session_state.gaming_preset = "competitive"
+                    st.success("Applied competitive gaming preset!")
+            
+            with preset_cols[1]:
+                if st.button("🎮 Balanced Gaming", use_container_width=True):
+                    # Balanced approach for all games
+                    st.session_state.gaming_preset = "balanced"
+                    st.success("Applied balanced gaming preset!")
+            
+            with preset_cols[2]:
+                if st.button("💰 Budget Gaming", use_container_width=True):
+                    # Conservative settings for stability
+                    st.session_state.gaming_preset = "budget"
+                    st.success("Applied budget gaming preset!")
+            
+        except ImportError:
+            st.error("Gaming performance module not available. Please check installation.")
+    
+    # Tab 5: Analysis (moved from tab4)
+    with tab5:
         st.header("📊 Advanced Analysis")
         
         # Performance comparison
@@ -784,9 +898,125 @@ def create_perfect_web_interface():
                 fig = px.bar(importance_df, x='Importance', y='Feature', 
                            orientation='h', title='Parameter Importance for Performance')
                 st.plotly_chart(fig, use_container_width=True)
-    
-    # Tab 5: Revolutionary Features
-    with tab5:
+        
+        # Current configuration analysis
+        st.subheader("🔍 Current Configuration Analysis")
+        
+        # Get current configuration
+        if hasattr(st.session_state, 'manual_config') and st.session_state.manual_config:
+            current_config = st.session_state.manual_config
+        elif enable_manual:
+            current_config = DDR5Configuration(
+                frequency=frequency,
+                timings=DDR5TimingParameters(
+                    cl=cl, trcd=trcd, trp=trp, tras=tras, trc=trc, trfc=trfc
+                ),
+                voltages=DDR5VoltageParameters(vddq=vddq, vpp=vpp)
+            )
+        else:
+            current_config = create_preset_config(frequency, capacity, rank_count)
+        
+        # Load and analyze current config
+        st.session_state.simulator.load_configuration(current_config)
+        
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            bandwidth_result = st.session_state.simulator.simulate_bandwidth()
+            st.metric("Bandwidth", f"{bandwidth_result['effective_bandwidth_gbps']:.1f} GB/s",
+                     help="Theoretical maximum bandwidth")
+        
+        with col2:
+            latency_result = st.session_state.simulator.simulate_latency()
+            st.metric("Latency", f"{latency_result['effective_latency_ns']:.1f} ns",
+                     help="Memory access latency")
+        
+        with col3:
+            power_result = st.session_state.simulator.simulate_power_consumption()
+            st.metric("Power", f"{power_result['total_power_mw']:.0f} mW",
+                     help="Estimated power consumption")
+        
+        # Timing relationships analysis
+        st.subheader("📏 Timing Relationships")
+        
+        timing_checks = []
+        timings = current_config.timings
+        
+        # Check critical timing relationships
+        if timings.tras >= timings.trcd + timings.cl:
+            timing_checks.append("✅ tRAS >= tRCD + CL (Valid)")
+        else:
+            timing_checks.append("❌ tRAS < tRCD + CL (Invalid - may cause instability)")
+        
+        if timings.trc >= timings.tras + timings.trp:
+            timing_checks.append("✅ tRC >= tRAS + tRP (Valid)")
+        else:
+            timing_checks.append("❌ tRC < tRAS + tRP (Invalid - may cause corruption)")
+        
+        if timings.trfc >= timings.trc * 4:
+            timing_checks.append("✅ tRFC timing appears reasonable")
+        else:
+            timing_checks.append("⚠️ tRFC may be too tight for stability")
+        
+        for check in timing_checks:
+            if "✅" in check:
+                st.success(check)
+            elif "❌" in check:
+                st.error(check)
+            else:
+                st.warning(check)
+        
+        # Voltage analysis
+        st.subheader("⚡ Voltage Analysis")
+        
+        voltage_checks = []
+        voltages = current_config.voltages
+        
+        if voltages.vddq <= 1.1:
+            voltage_checks.append("🔋 VDDQ: Conservative (Excellent for 24/7)")
+        elif voltages.vddq <= 1.25:
+            voltage_checks.append("⚖️ VDDQ: Moderate (Good daily driver)")
+        elif voltages.vddq <= 1.35:
+            voltage_checks.append("⚡ VDDQ: Aggressive (Performance oriented)")
+        else:
+            voltage_checks.append("🔥 VDDQ: Extreme (Requires excellent cooling)")
+        
+        if voltages.vpp <= 1.8:
+            voltage_checks.append("✅ VPP: Within JEDEC spec")
+        else:
+            voltage_checks.append("⚠️ VPP: Above JEDEC spec")
+        
+        for check in voltage_checks:
+            st.info(check)
+
+        # Performance vs competitors
+        st.subheader("🏁 Performance Comparison")
+        
+        competitors = [
+            {"name": "JEDEC Baseline", "freq": 4800, "cl": 40, "score": 100},
+            {"name": "Gaming Sweet Spot", "freq": 5600, "cl": 36, "score": 115},
+            {"name": "Enthusiast Choice", "freq": 6000, "cl": 32, "score": 125},
+            {"name": "Extreme Overclock", "freq": 7200, "cl": 34, "score": 140}
+        ]
+        
+        # Calculate current config score
+        current_score = (current_config.frequency / 4800) * 100 * (40 / current_config.timings.cl)
+        
+        competitor_df = pd.DataFrame(competitors)
+        competitor_df.loc[len(competitor_df)] = {
+            "name": "Your Config", 
+            "freq": current_config.frequency,
+            "cl": current_config.timings.cl,
+            "score": int(current_score)
+        }
+        
+        fig = px.bar(competitor_df, x='name', y='score', 
+                    title='Performance Score Comparison',
+                    color='score', color_continuous_scale='viridis')
+        st.plotly_chart(fig, use_container_width=True)
+
+    # Tab 6: Revolutionary Features
+    with tab6:
         st.header("🔬 Revolutionary AI Features")
         
         col1, col2 = st.columns(2)
@@ -856,8 +1086,8 @@ def create_perfect_web_interface():
                         "optimal_configs_found": 23
                     })
     
-    # Tab 6: Benchmarks
-    with tab6:
+    # Tab 7: Benchmarks
+    with tab7:
         st.header("📈 Performance Benchmarks")
         
         st.subheader("🏆 Benchmark Results")
@@ -900,8 +1130,8 @@ def create_perfect_web_interface():
         gaming_df = pd.DataFrame(gaming_data)
         st.dataframe(gaming_df, use_container_width=True)
     
-    # Tab 7: Hardware Detection
-    with tab7:
+    # Tab 8: Hardware Detection
+    with tab8:
         st.header("💻 Hardware Detection & Real RAM Database")
         
         col1, col2 = st.columns([2, 1])
@@ -1300,25 +1530,109 @@ def create_perfect_web_interface():
         - Monitor system stability continuously
         """)
 
-    # Tab 8: Live Tuning
-    with tab8:
+    # Tab 9: Live Tuning
+    with tab9:
         st.header("⚡ Live DDR5 Tuning with Safety Systems")
         
-        # Import live tuner
-        try:
-            from live_tuner import create_live_tuner, get_safety_recommendations, SafetyLevel, TuningStatus
-            live_tuner_available = True
-        except ImportError:
-            st.error("❌ Live tuning module not available")
-            live_tuner_available = False
+        # Live tuning simulation (safer approach)
+        st.info("""
+        🔬 **Live Tuning Simulation Mode**
         
-        if not live_tuner_available:
-            st.stop()
+        This demonstrates what live tuning would look like, but operates in safe simulation mode.
+        No actual hardware changes are made.
+        """)
         
-        # Initialize live tuner in session state
-        if 'live_tuner' not in st.session_state:
-            st.session_state.live_tuner = None
-            st.session_state.monitoring_active = False
+        # Safety level selector
+        safety_level = st.selectbox(
+            "Safety Level",
+            ["Conservative", "Moderate", "Aggressive"],
+            index=0,
+            help="Higher levels allow more aggressive tuning"
+        )
+        
+        # Current system status simulation
+        st.subheader("📊 System Monitoring")
+        
+        col1, col2, col3, col4 = st.columns(4)
+        
+        with col1:
+            # Simulate CPU temperature
+            cpu_temp = 45.0 + (current_config.frequency - 4800) / 200
+            st.metric("CPU Temp", f"{cpu_temp:.1f}°C", 
+                     delta="Normal" if cpu_temp < 70 else "Warm")
+        
+        with col2:
+            # Simulate memory temperature
+            mem_temp = 35.0 + (current_config.voltages.vddq - 1.1) * 20
+            st.metric("Memory Temp", f"{mem_temp:.1f}°C",
+                     delta="Good" if mem_temp < 50 else "Elevated")
+        
+        with col3:
+            # Simulate stability score
+            stability = max(60, 95 - (current_config.frequency - 4800) / 100)
+            st.metric("Stability", f"{stability:.1f}%",
+                     delta="Stable" if stability > 90 else "Monitor")
+        
+        with col4:
+            # Simulate error rate
+            error_rate = max(0, (current_config.frequency - 5600) / 1000)
+            st.metric("Error Rate", f"{error_rate:.3f}%",
+                     delta="Excellent" if error_rate < 0.001 else "Acceptable")
+        
+        # Live tuning controls
+        st.subheader("⚡ Live Tuning Controls")
+        
+        if st.button("🔍 Test Current Configuration", type="primary"):
+            with st.spinner("Running stability test..."):
+                time.sleep(3)  # Simulate test time
+                
+                if stability > 85:
+                    st.success("✅ Configuration passed stability test!")
+                    st.info(f"Completed {1000} memory operations without errors")
+                else:
+                    st.warning("⚠️ Configuration shows potential instability")
+                    st.info("Consider reducing frequency or loosening timings")
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            if st.button("🚀 Auto-Optimize", use_container_width=True):
+                with st.spinner("Finding optimal settings..."):
+                    time.sleep(2)
+                    st.success("Found optimized configuration!")
+                    st.info("Suggested: DDR5-6000 CL30-36-36-76 @ 1.25V")
+        
+        with col2:
+            if st.button("🔄 Revert to Safe", use_container_width=True):
+                st.success("Reverted to JEDEC-safe settings")
+                st.info("DDR5-4800 CL40-40-40-77 @ 1.1V")
+        
+        # Live tuning history
+        st.subheader("📈 Tuning History")
+        
+        history_data = [
+            {"Time": "14:30", "Action": "Increased frequency to 5600", "Result": "✅ Stable"},
+            {"Time": "14:25", "Action": "Tightened CL to 36", "Result": "✅ Stable"},
+            {"Time": "14:20", "Action": "Started baseline test", "Result": "✅ Passed"},
+        ]
+        
+        history_df = pd.DataFrame(history_data)
+        st.dataframe(history_df, use_container_width=True)
+        
+        # Safety recommendations
+        st.subheader("🛡️ Safety Recommendations")
+        
+        safety_tips = [
+            "💾 Always create a system restore point before live tuning",
+            "🌡️ Monitor temperatures continuously during testing",
+            "⏱️ Test each change for at least 15 minutes before applying the next",
+            "🔄 Keep BIOS recovery options readily available",
+            "💪 Ensure PSU can handle increased power draw",
+            "❄️ Verify cooling is adequate for voltage increases"
+        ]
+        
+        for tip in safety_tips:
+            st.info(tip)
         
         # Safety warnings and disclaimers
         st.error("""
@@ -1768,8 +2082,8 @@ def create_perfect_web_interface():
                 st.error("❌ **Live tuning not recommended with this configuration**")
                 st.info("Consider using safer parameters or improved cooling before attempting live tuning.")
 
-    # Tab 9: Cross-Brand Tuning
-    with tab9:
+    # Tab 10: Cross-Brand Tuning
+    with tab10:
         st.header("🔄 Cross-Brand RAM Tuning")
         st.markdown("**Revolutionary AI-powered optimization for mixed RAM configurations!**")
         st.markdown("Eliminate the need for matched kits - get stable performance with different brands.")

@@ -7,7 +7,7 @@ Eliminates the need for matched kits by finding stable timings across different 
 from typing import List, Dict, Tuple, Optional
 from dataclasses import dataclass
 import numpy as np
-from ddr5_models import DDR5Configuration, DDR5TimingParameters, DDR5VoltageParameters
+from .ddr5_models import DDR5Configuration, DDR5TimingParameters, DDR5VoltageParameters
 from hardware_detection import DetectedRAMModule
 from ram_database import DDR5ModuleSpec, get_database
 

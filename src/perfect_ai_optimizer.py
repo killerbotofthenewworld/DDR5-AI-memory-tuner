@@ -16,10 +16,10 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
 
-from ddr5_models import (DDR5Configuration, DDR5TimingParameters, 
+from .ddr5_models import (DDR5Configuration, DDR5TimingParameters, 
                          DDR5VoltageParameters)
-from ddr5_simulator import DDR5Simulator
-from revolutionary_features import RevolutionaryDDR5Features
+from .ddr5_simulator import DDR5Simulator
+from .revolutionary_features import RevolutionaryDDR5Features
 
 warnings.filterwarnings('ignore')
 

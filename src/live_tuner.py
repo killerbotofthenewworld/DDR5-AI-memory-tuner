@@ -13,7 +13,7 @@ from enum import Enum
 import json
 import os
 
-from ddr5_models import (DDR5Configuration, DDR5TimingParameters, 
+from .ddr5_models import (DDR5Configuration, DDR5TimingParameters, 
                          DDR5VoltageParameters)
 
 

@@ -14,8 +14,8 @@ import pandas as pd
 import warnings
 warnings.filterwarnings('ignore')
 
-from ddr5_models import DDR5Configuration, DDR5TimingParameters, DDR5VoltageParameters
-from ddr5_simulator import DDR5Simulator
+from .ddr5_models import DDR5Configuration, DDR5TimingParameters, DDR5VoltageParameters
+from .ddr5_simulator import DDR5Simulator
 
 
 class AdvancedAIOptimizer:
