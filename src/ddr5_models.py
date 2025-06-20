@@ -31,6 +31,9 @@ class DDR5TimingParameters:
     trrd_l: int = 6  # Row activate to row activate (different bank group)
     twtr_s: int = 3  # Write to read (same bank group)
     twtr_l: int = 9  # Write to read (different bank group)
+    tccd_l: int = 5  # Column to column delay (different bank group)
+    trrds: int = 4  # Alias for trrd_s for compatibility
+    trrdl: int = 6  # Alias for trrd_l for compatibility
     
     def validate_relationships(self) -> List[str]:
         """Validate DDR5 timing relationships and return any violations."""

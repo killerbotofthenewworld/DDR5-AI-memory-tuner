@@ -204,7 +204,8 @@ def create_perfect_web_interface():
                 st.session_state.preset_config = "extreme"
     
     # Main content area with tabs
-    tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs([
+    tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9 = st.tabs([
+        "⚙️ Manual Tuning",
         "🎯 Simulation", 
         "🧠 AI Optimization", 
         "📊 Analysis", 
@@ -215,11 +216,224 @@ def create_perfect_web_interface():
         "🔄 Cross-Brand Tuning"
     ])
     
-    # Tab 1: Simulation
+    # Tab 1: Manual Tuning (NEW - Primary timing controls)
     with tab1:
+        st.header("⚙️ Manual DDR5 Timing Configuration")
+        st.info("🎯 **Direct Control**: Manually adjust all DDR5 timing parameters for precise tuning")
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.subheader("🚀 Primary Timings")
+            
+            # Calculate intelligent defaults based on frequency
+            base_cl = max(16, int(frequency * 0.0055))
+            default_trcd = max(16, int(frequency * 0.006))
+            default_trp = max(16, int(frequency * 0.0055))
+            default_tras = max(32, int(frequency * 0.0125))
+            
+            manual_cl = st.number_input(
+                "CL (CAS Latency)", 
+                min_value=14, max_value=60, 
+                value=base_cl,
+                help="CAS Latency - Lower is faster but less stable"
+            )
+            
+            manual_trcd = st.number_input(
+                "tRCD (RAS to CAS Delay)", 
+                min_value=14, max_value=60, 
+                value=default_trcd,
+                help="Time between row activation and column access"
+            )
+            
+            manual_trp = st.number_input(
+                "tRP (Row Precharge)", 
+                min_value=14, max_value=60, 
+                value=default_trp,
+                help="Time to precharge a row before accessing new row"
+            )
+            
+            manual_tras = st.number_input(
+                "tRAS (Row Active Strobe)", 
+                min_value=28, max_value=80, 
+                value=default_tras,
+                help="Minimum time a row must be active"
+            )
+            
+            # Auto-calculated tRC
+            manual_trc = manual_tras + manual_trp
+            st.metric(
+                "tRC (Row Cycle)", 
+                f"{manual_trc}",
+                help="Auto-calculated: tRAS + tRP"
+            )
+        
+        with col2:
+            st.subheader("⚡ Secondary Timings")
+            
+            manual_trfc = st.number_input(
+                "tRFC (Refresh Cycle)", 
+                min_value=160, max_value=500, 
+                value=280 + (frequency - 3200) // 400 * 20,
+                help="Refresh cycle time - affects how often memory refreshes"
+            )
+            
+            manual_tfaw = st.number_input(
+                "tFAW (Four Activate Window)", 
+                min_value=16, max_value=50, 
+                value=max(16, int(frequency * 0.008)),
+                help="Time window for four row activations"
+            )
+            
+            manual_trrds = st.number_input(
+                "tRRD_S (Row-to-Row Delay Same)", 
+                min_value=4, max_value=12, 
+                value=max(4, int(frequency * 0.0015)),
+                help="Delay between row activations in same bank group"
+            )
+            
+            manual_trrdl = st.number_input(
+                "tRRD_L (Row-to-Row Delay Long)", 
+                min_value=4, max_value=12, 
+                value=max(6, int(frequency * 0.0018)),
+                help="Delay between row activations in different bank groups"
+            )
+            
+            manual_tccdl = st.number_input(
+                "tCCD_L (Column-to-Column Long)", 
+                min_value=4, max_value=12, 
+                value=max(5, int(frequency * 0.0015)),
+                help="Column access delay for different bank groups"
+            )
+        
+        st.divider()
+        
+        # Voltage controls
+        col3, col4 = st.columns(2)
+        
+        with col3:
+            st.subheader("⚡ Voltage Settings")
+            
+            manual_vddq = st.slider(
+                "VDDQ (Core Voltage)", 
+                min_value=1.00, max_value=1.35, 
+                value=1.10, step=0.01,
+                help="Main DDR5 operating voltage (1.1V nominal)"
+            )
+            
+            manual_vpp = st.slider(
+                "VPP (Peripheral Voltage)", 
+                min_value=1.70, max_value=2.00, 
+                value=1.80, step=0.01,
+                help="Wordline voltage (1.8V nominal)"
+            )
+        
+        with col4:
+            st.subheader("🎛️ Advanced Settings")
+            
+            manual_gear = st.selectbox(
+                "Gear Mode",
+                [1, 2],
+                index=0,
+                help="Gear 1: 1:1 ratio, Gear 2: 1:2 ratio (better for high frequencies)"
+            )
+            
+            manual_cmd_rate = st.selectbox(
+                "Command Rate",
+                [1, 2],
+                index=0,
+                help="Commands per clock cycle (1T faster, 2T more stable)"
+            )
+        
+        # Manual config validation and preview
+        st.divider()
+        st.subheader("📋 Configuration Preview")
+        
+        # Create manual configuration
+        manual_config = DDR5Configuration(
+            frequency=frequency,
+            timings=DDR5TimingParameters(
+                cl=manual_cl,
+                trcd=manual_trcd,
+                trp=manual_trp,
+                tras=manual_tras,
+                trc=manual_trc,
+                trfc=manual_trfc,
+                tfaw=manual_tfaw,
+                trrds=manual_trrds,
+                trrdl=manual_trrdl,
+                tccd_l=manual_tccdl
+            ),
+            voltages=DDR5VoltageParameters(
+                vddq=manual_vddq,
+                vpp=manual_vpp
+            )
+        )
+        
+        # Display timing table
+        col5, col6 = st.columns(2)
+        
+        with col5:
+            st.markdown("**Primary Timings:**")
+            timing_data = {
+                "Parameter": ["CL", "tRCD", "tRP", "tRAS", "tRC"],
+                "Value": [manual_cl, manual_trcd, manual_trp, manual_tras, manual_trc],
+                "Unit": ["clocks"] * 5
+            }
+            st.dataframe(timing_data, hide_index=True)
+        
+        with col6:
+            st.markdown("**Secondary Timings:**")
+            secondary_data = {
+                "Parameter": ["tRFC", "tFAW", "tRRD_S", "tRRD_L", "tCCD_L"],
+                "Value": [manual_trfc, manual_tfaw, manual_trrds, manual_trrdl, manual_tccdl],
+                "Unit": ["clocks"] * 5
+            }
+            st.dataframe(secondary_data, hide_index=True)
+        
+        # Validation warnings
+        validation_issues = []
+        if manual_tras < (manual_trcd + manual_cl):
+            validation_issues.append("⚠️ tRAS should be ≥ tRCD + CL")
+        if manual_trc != (manual_tras + manual_trp):
+            validation_issues.append("⚠️ tRC should equal tRAS + tRP")
+        if manual_vddq > 1.25:
+            validation_issues.append("🔥 High VDDQ voltage - monitor temperatures!")
+        if manual_cl < 16 and frequency > 5600:
+            validation_issues.append("⚠️ Very aggressive CL for this frequency")
+        
+        if validation_issues:
+            for issue in validation_issues:
+                st.warning(issue)
+        else:
+            st.success("✅ Configuration looks good!")
+        
+        # Apply button
+        if st.button("🚀 Apply Manual Configuration", type="primary", use_container_width=True):
+            st.session_state.manual_config = manual_config
+            st.success("✅ Manual configuration applied! Check the Simulation tab for results.")
+    
+    # Tab 2: Simulation (moved from tab1)
+    with tab2:
         st.header("🎯 DDR5 Simulation Results")
         
-        # Create configuration
+        # Create configuration - prioritize manual config if available
+        if hasattr(st.session_state, 'manual_config') and st.session_state.manual_config:
+            config = st.session_state.manual_config
+            st.info("📝 Using Manual Configuration")
+        elif enable_manual:
+            config = DDR5Configuration(
+                frequency=frequency,
+                timings=DDR5TimingParameters(
+                    cl=cl, trcd=trcd, trp=trp, tras=tras, trc=trc, trfc=trfc
+                ),
+                voltages=DDR5VoltageParameters(vddq=vddq, vpp=vpp)
+            )
+            st.info("⚙️ Using Sidebar Manual Configuration")
+        else:
+            # Use preset configuration
+            config = create_preset_config(frequency, capacity, rank_count)
+            st.info("🎯 Using Preset Configuration")
         if enable_manual:
             config = DDR5Configuration(
                 frequency=frequency,
@@ -334,8 +548,8 @@ def create_perfect_web_interface():
             - VPP: {config.voltages.vpp:.3f}V
             """)
     
-    # Tab 2: AI Optimization
-    with tab2:
+    # Tab 3: AI Optimization
+    with tab3:
         st.header("🧠 AI-Powered Optimization")
         
         if hasattr(st.session_state, 'run_ai_optimization') and st.session_state.run_ai_optimization:
@@ -509,8 +723,8 @@ def create_perfect_web_interface():
                 - Pattern Recognition
                 """)
     
-    # Tab 3: Analysis
-    with tab3:
+    # Tab 4: Analysis
+    with tab4:
         st.header("📊 Advanced Analysis")
         
         # Performance comparison
@@ -571,8 +785,8 @@ def create_perfect_web_interface():
                            orientation='h', title='Parameter Importance for Performance')
                 st.plotly_chart(fig, use_container_width=True)
     
-    # Tab 4: Revolutionary Features
-    with tab4:
+    # Tab 5: Revolutionary Features
+    with tab5:
         st.header("🔬 Revolutionary AI Features")
         
         col1, col2 = st.columns(2)
@@ -642,8 +856,8 @@ def create_perfect_web_interface():
                         "optimal_configs_found": 23
                     })
     
-    # Tab 5: Benchmarks
-    with tab5:
+    # Tab 6: Benchmarks
+    with tab6:
         st.header("📈 Performance Benchmarks")
         
         st.subheader("🏆 Benchmark Results")
@@ -686,8 +900,8 @@ def create_perfect_web_interface():
         gaming_df = pd.DataFrame(gaming_data)
         st.dataframe(gaming_df, use_container_width=True)
     
-    # Tab 6: Hardware Detection
-    with tab6:
+    # Tab 7: Hardware Detection
+    with tab7:
         st.header("💻 Hardware Detection & Real RAM Database")
         
         col1, col2 = st.columns([2, 1])
@@ -1086,8 +1300,8 @@ def create_perfect_web_interface():
         - Monitor system stability continuously
         """)
 
-    # Tab 7: Live Tuning
-    with tab7:
+    # Tab 8: Live Tuning
+    with tab8:
         st.header("⚡ Live DDR5 Tuning with Safety Systems")
         
         # Import live tuner
@@ -1554,8 +1768,8 @@ def create_perfect_web_interface():
                 st.error("❌ **Live tuning not recommended with this configuration**")
                 st.info("Consider using safer parameters or improved cooling before attempting live tuning.")
 
-    # Tab 8: Cross-Brand Tuning
-    with tab8:
+    # Tab 9: Cross-Brand Tuning
+    with tab9:
         st.header("🔄 Cross-Brand RAM Tuning")
         st.markdown("**Revolutionary AI-powered optimization for mixed RAM configurations!**")
         st.markdown("Eliminate the need for matched kits - get stable performance with different brands.")
