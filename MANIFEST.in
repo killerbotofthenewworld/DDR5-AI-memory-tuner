@@ -1,0 +1,12 @@
+include README.md
+include LICENSE
+include requirements.txt
+include CONTRIBUTING.md
+include main.py
+recursive-include src *.py
+recursive-include tests *.py
+recursive-exclude * __pycache__
+recursive-exclude * *.py[co]
+recursive-exclude * *.orig
+recursive-exclude * *.rej
+recursive-exclude * .DS_Store
