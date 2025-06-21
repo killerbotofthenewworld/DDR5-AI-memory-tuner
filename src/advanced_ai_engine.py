@@ -527,7 +527,7 @@ class AdvancedAIEngine:
             )
         
         # Denormalize parameters
-        frequency = max(3200, min(8000, int(vector[0] * 8000)))
+        frequency = max(4000, min(8000, int(vector[0] * 8000)))
         cl = max(14, min(50, int(vector[1] * 50)))
         trcd = max(14, min(50, int(vector[2] * 50)))
         trp = max(14, min(50, int(vector[3] * 50)))
