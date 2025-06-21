@@ -166,3 +166,36 @@ class DDR5Configuration(BaseModel):
             self.stability_score = max(0, min(100, margin_score))
         
         return self.stability_score
+    
+    def validate_jedec_compliance(self) -> Dict[str, List[str]]:
+        """Validate configuration against JEDEC DDR5 standards."""
+        violations = {
+            'jedec_frequency_violations': [],
+            'jedec_timing_violations': [],
+            'jedec_voltage_violations': []
+        }
+        # JEDEC frequency validation
+        jedec_frequencies = [4000, 4400, 4800, 5200, 5600, 6000, 6400, 6800, 7200, 7600, 8000, 8400]
+        if self.frequency not in jedec_frequencies:
+            violations['jedec_frequency_violations'].append(
+                f"Frequency {self.frequency} MT/s is not JEDEC standard. Valid: {jedec_frequencies}")
+        # JEDEC timing validation (example: tCL, tRCD, tRP >= 13.75ns)
+        cycle_time_ns = 2000 / self.frequency
+        min_ns = 13.75
+        if self.timings.cl * cycle_time_ns < min_ns:
+            violations['jedec_timing_violations'].append(
+                f"tCL ({self.timings.cl * cycle_time_ns:.2f}ns) below JEDEC minimum ({min_ns}ns)")
+        if self.timings.trcd * cycle_time_ns < min_ns:
+            violations['jedec_timing_violations'].append(
+                f"tRCD ({self.timings.trcd * cycle_time_ns:.2f}ns) below JEDEC minimum ({min_ns}ns)")
+        if self.timings.trp * cycle_time_ns < min_ns:
+            violations['jedec_timing_violations'].append(
+                f"tRP ({self.timings.trp * cycle_time_ns:.2f}ns) below JEDEC minimum ({min_ns}ns)")
+        # JEDEC voltage validation
+        if not (1.0 <= self.voltages.vddq <= 1.2):
+            violations['jedec_voltage_violations'].append(
+                f"VDDQ ({self.voltages.vddq}V) outside JEDEC range (1.0V - 1.2V)")
+        if not (1.7 <= self.voltages.vpp <= 1.9):
+            violations['jedec_voltage_violations'].append(
+                f"VPP ({self.voltages.vpp}V) outside JEDEC range (1.7V - 1.9V)")
+        return violations

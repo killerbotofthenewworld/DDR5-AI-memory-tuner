@@ -1,0 +1,9 @@
+Package: ddr5-simulator
+Version: 5.0
+Section: utils
+Priority: optional
+Architecture: amd64
+Depends: python3, streamlit
+Maintainer: Your Name <your@email.com>
+Description: DDR5 AI Sandbox Simulator
+ Advanced AI-powered DDR5 memory tuning and simulation.

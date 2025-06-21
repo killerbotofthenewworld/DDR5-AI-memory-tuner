@@ -169,6 +169,33 @@ Enjoy exploring and optimizing DDR5 memory with ease!
 
 ---
 
+## 🛡️ JEDEC Compliance Validation
+
+DDR5 memory modules must comply with JEDEC standards for safe and reliable operation. The DDR5 AI Sandbox Simulator now includes automatic JEDEC compliance validation for:
+
+- **Frequencies**: Only allows JEDEC-standard DDR5 speeds (e.g., 4000, 4400, ..., 8400 MT/s)
+- **Timings**: Ensures tCL, tRCD, and tRP meet minimum JEDEC nanosecond requirements for each speed
+- **Voltages**: Checks that VDDQ and VPP are within JEDEC-specified safe ranges
+
+### How to Use
+
+- **Web Interface**: When you tune or optimize memory, the simulator checks JEDEC compliance and will warn you if any setting is out of spec.
+- **Python API**: Call `validate_jedec_compliance()` on any `DDR5Configuration` object to get a detailed report:
+
+```python
+violations = config.validate_jedec_compliance()
+if any(violations.values()):
+    print("Not JEDEC compliant:", violations)
+else:
+    print("Configuration is JEDEC compliant!")
+```
+
+### Why JEDEC Compliance Matters
+
+JEDEC standards ensure your memory configuration is safe, stable, and compatible with all DDR5 hardware. Non-compliant settings may cause instability or hardware issues.
+
+---
+
 ## 🏆 Performance Achievements
 
 ### 🚀 AI Optimization Results
@@ -467,3 +494,34 @@ Revolutionizing memory optimization through artificial intelligence.
 - **Memory Ranking System**: Rank memory configurations based on performance and stability.
 
 ---
+
+## 🖥️ Easy Desktop Installation (Fedora/RPM)
+
+### Install as a Native Desktop App
+
+You can now install the DDR5 AI Sandbox Simulator as a true desktop application on Fedora and compatible RPM-based Linux distributions. This provides a graphical launcher, menu integration, and a seamless user experience—no terminal required for normal use!
+
+#### **Quick Desktop Install**
+
+1. **Install the RPM package:**
+
+   ```bash
+   sudo dnf install -y ./dist/ddr5-simulator-5.0-1.fc42.x86_64.rpm
+   ```
+
+2. **Launch from your application menu:**
+   - Search for "DDR5 Simulator" in your desktop menu and launch it like any other app.
+   - Or run `launch_ddr5` from a terminal.
+
+#### **What’s Included**
+
+- **Graphical Launcher:** Integrated with your desktop environment
+- **Desktop Entry:** Appears in your app menu
+- **Custom Icon:** For a polished look
+- **No Terminal Needed:** All features accessible via GUI
+
+#### **Uninstall**
+
+```bash
+sudo dnf remove ddr5-simulator
+```

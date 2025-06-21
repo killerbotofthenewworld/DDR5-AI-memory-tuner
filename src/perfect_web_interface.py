@@ -392,6 +392,16 @@ def create_perfect_web_interface():
             }
             st.dataframe(secondary_data, hide_index=True)
         
+        # JEDEC compliance check
+        jedec_violations = manual_config.validate_jedec_compliance()
+        if any(jedec_violations.values()):
+            st.error("❌ Not JEDEC compliant:")
+            for category, issues in jedec_violations.items():
+                for issue in issues:
+                    st.write(f"- {issue}")
+        else:
+            st.info("🛡️ JEDEC compliant configuration.")
+        
         # Validation warnings
         validation_issues = []
         if manual_tras < (manual_trcd + manual_cl):

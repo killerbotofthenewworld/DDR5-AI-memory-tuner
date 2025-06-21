@@ -1,0 +1,31 @@
+Requesting password for hardware scanning...
+
+(zenity:628812): Gtk-WARNING **: 10:22:46.926: Unknown key gtk-modules in /home/dylan/.config/gtk-4.0/settings.ini
+
+(zenity:628812): Adwaita-WARNING **: 10:22:46.973: Using GtkSettings:gtk-application-prefer-dark-theme with libadwaita is unsupported. Please use AdwStyleManager:color-scheme instead.
+
+(zenity:628812): Gtk-WARNING **: 10:22:47.038: Trying to measure GtkLabel 0x55f078631ab0 for width of 324, but it needs at least 473
+
+(zenity:628812): Gtk-WARNING **: 10:22:47.038: Trying to measure GtkLabel 0x55f078631ab0 for width of 252, but it needs at least 473
+
+(zenity:628812): Gtk-WARNING **: 10:22:47.038: Trying to measure GtkLabel 0x55f078631ab0 for width of 194, but it needs at least 473
+
+(zenity:628812): Gtk-WARNING **: 10:22:47.038: Trying to measure GtkLabel 0x55f078631ab0 for width of 436, but it needs at least 473
+
+(zenity:628812): Gtk-WARNING **: 10:22:47.038: Trying to measure GtkLabel 0x55f078631ab0 for width of 224, but it needs at least 473
+
+(zenity:628812): Gtk-WARNING **: 10:22:47.038: Trying to measure GtkLabel 0x55f078631ab0 for width of 209, but it needs at least 473
+
+  You can now view your Streamlit app in your browser.
+
+  Local URL: http://localhost:8501
+  Network URL: http://192.168.0.10:8501
+
+./start_simulator.sh: line 22: wait: pid 628957 is not a child of this shell
+
+(zenity:629108): Gtk-WARNING **: 10:22:55.474: Unknown key gtk-modules in /home/dylan/.config/gtk-4.0/settings.ini
+
+(zenity:629108): Adwaita-WARNING **: 10:22:55.522: Using GtkSettings:gtk-application-prefer-dark-theme with libadwaita is unsupported. Please use AdwStyleManager:color-scheme instead.
+🧠 Advanced AI Engine initialized with cutting-edge techniques!
+🧠 Advanced AI Engine initialized with cutting-edge techniques!
+  Stopping...
