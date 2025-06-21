@@ -77,7 +77,7 @@ class DDR5Configuration(BaseModel):
     """Complete DDR5 memory configuration."""
     
     # Basic specifications
-    frequency: int = Field(default=5600, ge=3200, le=8400, description="Memory frequency in MT/s")
+    frequency: int = Field(default=5600, ge=4000, le=8400, description="Memory frequency in MT/s")
     capacity: int = Field(default=16, description="Capacity per stick in GB")
     rank_count: int = Field(default=1, ge=1, le=2, description="Number of ranks per DIMM")
     
