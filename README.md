@@ -41,7 +41,7 @@ streamlit run main.py
 
 ---
 
-## 🚀 Easy Startup Guide
+## 🚀 Quick Guide
 
 Follow these steps to get started with the DDR5 AI Sandbox Simulator:
 
