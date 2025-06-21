@@ -41,6 +41,41 @@ streamlit run main.py
 
 ---
 
+## 🚀 Easy Startup Guide
+
+Follow these steps to get started with the DDR5 AI Sandbox Simulator:
+
+1. **Clone the Repository**
+   ```bash
+   git clone https://github.com/killerbotofthenewworld/ddr5-ai-sandbox-simulator.git
+   cd ddr5-ai-sandbox-simulator
+   ```
+
+2. **Install Dependencies**
+   Make sure you have Python 3.8+ installed. Then, install the required packages:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. **Run the Simulator**
+   Start the DDR5 AI Sandbox Simulator using Streamlit:
+   ```bash
+   streamlit run main.py
+   ```
+
+4. **Access the Web Interface**
+   Open your browser and go to the URL displayed in the terminal (usually `http://localhost:8501`).
+
+5. **Explore the Features**
+   - **Manual Tuning**: Adjust DDR5 timings manually.
+   - **Advanced AI Engine**: Use AI to optimize memory parameters.
+   - **Gaming Performance Predictor**: See how your settings impact gaming performance.
+   - **Benchmark Integration**: Compare your settings with industry benchmarks.
+
+Enjoy exploring and optimizing DDR5 memory with ease!
+
+---
+
 ## 🌟 Revolutionary AI Features
 
 ### 🧠 Advanced AI Engine (NEW!)
