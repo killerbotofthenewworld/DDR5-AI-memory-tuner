@@ -4,8 +4,8 @@ Core simulation engine for DDR5 memory behavior and performance.
 """
 
 import numpy as np
-from typing import Dict, List, Tuple, Optional
-from .ddr5_models import DDR5Configuration, DDR5TimingParameters, DDR5VoltageParameters
+from typing import Dict, List, Any
+from .ddr5_models import DDR5Configuration, DDR5TimingParameters
 
 
 class DDR5Simulator:
@@ -66,10 +66,10 @@ class DDR5Simulator:
         timing_efficiency = self._calculate_timing_efficiency()
         
         effective_bandwidth = (
-            base_bandwidth * 
-            efficiency * 
-            pattern_efficiency[access_pattern] * 
-            queue_efficiency * 
+            base_bandwidth *
+            efficiency *
+            pattern_efficiency[access_pattern] *
+            queue_efficiency *
             timing_efficiency
         )
         
@@ -184,7 +184,7 @@ class DDR5Simulator:
         self, 
         test_duration_minutes: int = 30,
         stress_level: str = "medium"
-    ) -> Dict[str, any]:
+    ) -> Dict[str, Any]:
         """
         Simulate memory stability testing.
         
@@ -240,6 +240,18 @@ class DDR5Simulator:
             'recommendation': self._get_stability_recommendation(final_stability, config_violations)
         }
     
+    def calculate_stability(self) -> float:
+        """
+        Calculate the stability score for the current DDR5 configuration.
+
+        Returns:
+            Stability score as a float (0.0 to 1.0).
+        """
+        from .advanced_ai_engine import AdvancedAIEngine
+
+        ai_engine = AdvancedAIEngine()
+        return ai_engine.calculate_stability_score(self.current_config)
+    
     def _calculate_timing_efficiency(self) -> float:
         """Calculate efficiency based on timing parameters."""
         timings = self.current_config.timings
@@ -266,37 +278,59 @@ class DDR5Simulator:
             return max(0.95, 1.1 - avg_ratio)  # Penalty for loose timings
     
     def _calculate_command_overhead(self) -> float:
-        """Calculate command processing overhead."""
+        """
+        Calculate command processing overhead.
+
+        Returns:
+            Command overhead in nanoseconds.
+        """
         # Base command overhead in nanoseconds
         base_overhead = 2.5
-        
+
         # Additional overhead for high frequencies
-        frequency_overhead = max(0, (self.current_config.frequency - 5600) * 0.001)
-        
+        frequency_overhead = max(
+            0, (self.current_config.frequency - 5600) * 0.001
+        )
+
         return base_overhead + frequency_overhead
     
     def _get_stability_recommendation(
         self, 
-        stability_score: float, 
-        violations: Dict[str, List[str]]
+        stability_score: float,
+        config_violations: List[str]
     ) -> str:
-        """Generate stability improvement recommendations."""
-        if stability_score >= 90:
-            return "Configuration is excellent and should be very stable."
-        
+        """
+        Generate stability recommendations based on score and violations.
+
+        Args:
+            stability_score: Calculated stability score
+            config_violations: List of configuration violations
+
+        Returns:
+            Recommendation string
+        """
         recommendations = []
         
-        if violations['timing_violations']:
-            recommendations.append("Relax primary timings (CL, tRCD, tRP)")
+        if stability_score < 0.6:
+            recommendations.append("Increase voltage slightly")
+            recommendations.append("Reduce frequency")
+        if stability_score < 0.7:
+            recommendations.append("Consider better cooling solutions")
+        if stability_score < 0.8:
+            recommendations.append("Check memory seating and motherboard slots")
         
-        if violations['voltage_violations']:
-            recommendations.append("Adjust voltages within safe ranges")
-        
-        if stability_score < 60:
-            recommendations.append("Consider reducing frequency")
-            recommendations.append("Increase VDDQ voltage slightly")
+        # Specific recommendations based on common violations
+        for violation in config_violations:
+            if violation == "timing_violations":
+                recommendations.append("Relax timings in BIOS")
+            elif violation == "voltage_violations":
+                recommendations.append("Adjust voltage settings")
+            elif violation == "temperature_violations":
+                recommendations.append("Improve cooling or reduce load")
+            elif violation == "frequency_violations":
+                recommendations.append("Lower the memory frequency")
         
         if not recommendations:
-            recommendations.append("Fine-tune secondary timings for better stability")
+            return "No action needed. System is stable."
         
-        return "; ".join(recommendations)
+        return " | ".join(recommendations)

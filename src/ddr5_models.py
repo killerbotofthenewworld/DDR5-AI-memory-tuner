@@ -4,7 +4,7 @@ DDR5 Memory Configuration and Parameter Models
 
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 
 
 @dataclass
@@ -15,15 +15,15 @@ class DDR5TimingParameters:
     cl: int = 32  # CAS Latency
     trcd: int = 32  # RAS to CAS delay
     trp: int = 32  # Row precharge time
-    tras: int = 52  # Row active time
+    tras: int = 64  # Row active time (updated to satisfy tRAS >= tRCD + CL)
     
     # Secondary timings
-    trc: int = 84  # Row cycle time
+    trc: int = 96  # Row cycle time (updated to satisfy tRC >= tRAS + tRP)
     trfc: int = 295  # Refresh cycle time
     trefi: int = 3904  # Refresh interval
     twr: int = 24  # Write recovery time
     trtp: int = 12  # Read to precharge
-    tcwl: int = 24  # CAS Write Latency
+    tcwl: int = 31  # CAS Write Latency (updated to satisfy tCWL >= CL - 1)
     
     # Sub-timings
     tfaw: int = 16  # Four bank activate window
@@ -90,10 +90,14 @@ class DDR5Configuration(BaseModel):
     latency_ns: Optional[float] = Field(default=None, description="First word latency in ns")
     stability_score: Optional[float] = Field(default=None, ge=0, le=100, description="Stability score (0-100)")
     
-    @validator('frequency')
+    @field_validator('frequency')
+    @classmethod
     def validate_frequency(cls, v):
         """Ensure frequency is a valid DDR5 speed."""
-        valid_speeds = [3200, 3600, 4000, 4400, 4800, 5200, 5600, 6000, 6400, 6800, 7200, 7600, 8000, 8400]
+        valid_speeds = [
+            3200, 3600, 4000, 4400, 4800, 5200, 5600, 6000,
+            6400, 6800, 7200, 7600, 8000, 8400
+        ]
         if v not in valid_speeds:
             closest = min(valid_speeds, key=lambda x: abs(x - v))
             return closest
@@ -130,31 +134,35 @@ class DDR5Configuration(BaseModel):
         violations = self.validate_configuration()
         total_violations = sum(len(v) for v in violations.values())
         
-        if total_violations > 0:
-            return max(0, 50 - (total_violations * 10))
-        
-        # Calculate based on timing margins
+        # Calculate margin_score before assigning stability_score
         margin_score = 100
         
         # Penalize tight timings
         base_timings = DDR5TimingParameters()
         timing_factors = {
             'cl': (self.timings.cl - base_timings.cl) / base_timings.cl,
-            'trcd': (self.timings.trcd - base_timings.trcd) / base_timings.trcd,
+            'trcd': (
+                self.timings.trcd - base_timings.trcd
+            ) / base_timings.trcd,
             'trp': (self.timings.trp - base_timings.trp) / base_timings.trp,
         }
-        
+
         for factor in timing_factors.values():
             if factor < -0.2:  # More than 20% tighter than JEDEC
                 margin_score -= 15
             elif factor < -0.1:  # 10-20% tighter
                 margin_score -= 8
-        
+
         # Penalize high voltages
         if self.voltages.vddq > 1.15:
             margin_score -= 10
         if self.voltages.vpp > 1.85:
             margin_score -= 10
+
+        # Ensure stability_score is always set
+        if total_violations > 0:
+            self.stability_score = max(0, 50 - (total_violations * 10))
+        else:
+            self.stability_score = max(0, min(100, margin_score))
         
-        self.stability_score = max(0, min(100, margin_score))
         return self.stability_score

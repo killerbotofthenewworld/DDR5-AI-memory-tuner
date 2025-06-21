@@ -1034,41 +1034,61 @@ class AdvancedAIEngine:
         
         return results
 
-# Example usage and testing
+    def calculate_stability_score(self, configuration: DDR5Configuration) -> float:
+        """
+        Calculate a stability score for a given DDR5 configuration.
+
+        Args:
+            configuration: DDR5Configuration object.
+
+        Returns:
+            Stability score as a float (0.0 to 1.0).
+        """
+        # Example heuristic: penalize configurations with high tRAS relative to tRCD + tCL
+        timings = configuration.timings
+        tRAS = timings.tras
+        tRCD = timings.trcd
+        tCL = timings.cl
+
+        if tRAS < tRCD + tCL:
+            return 0.0  # Invalid configuration
+
+        # Stability score based on timing relationships
+        stability_score = 1.0 - ((tRAS - (tRCD + tCL)) / tRAS)
+        return max(0.0, min(1.0, stability_score))
+
+    def normalize_quantum_probabilities(
+        self, probabilities: List[float]
+    ) -> List[float]:
+        """
+        Normalize quantum probabilities to ensure they sum to 1.0.
+
+        Args:
+            probabilities: List of raw probabilities.
+
+        Returns:
+            Normalized probabilities.
+        """
+        total = sum(probabilities)
+        if total == 0:
+            return [
+                1.0 / len(probabilities)
+            ] * len(probabilities)  # Uniform distribution
+
+        return [p / total for p in probabilities]
+
+
 if __name__ == "__main__":
-    # Initialize advanced AI engine
+    # Example usage of the AI engine
     ai_engine = AdvancedAIEngine()
-    
-    # Run comprehensive optimization
-    print("🚀 Starting comprehensive AI optimization...")
-    
-    # Multi-objective optimization
-    results = ai_engine.optimize_multi_objective(['performance', 'stability', 'power_efficiency'])
-    
-    print(f"\n🏆 Optimization Results:")
-    for i, result in enumerate(results, 1):
-        print(f"  Method {i}: Performance={result.performance_score:.4f}, "
-              f"Stability={result.stability_score:.4f}, "
-              f"Efficiency={result.power_efficiency:.4f}")
-        print(f"    Config: DDR5-{result.configuration.frequency} "
-              f"CL{result.configuration.timings.cl}-{result.configuration.timings.trcd}-"
-              f"{result.configuration.timings.trp}-{result.configuration.timings.tras}")
-        print(f"    Voltage: {result.configuration.voltages.vddq:.2f}V")
-        print(f"    Explanation: {result.explanation}")
-        print()
-    
-    # Get best result
-    best_result = max(results, key=lambda x: x.performance_score)
-    print(f"🥇 Best Configuration: DDR5-{best_result.configuration.frequency}")
-    
-    # Generate insights
-    insights = ai_engine.get_explainable_insights(best_result.configuration)
-    print(f"🧠 AI Insights: {insights['performance_analysis']}")
-    
-    # Benchmark performance
-    benchmark_results = ai_engine.benchmark_ai_performance()
-    
-    # Save models
-    ai_engine.save_models()
-    
-    print("✅ Advanced AI optimization complete!")
+    results = ai_engine.optimize_multi_objective(
+        ["performance", "stability", "power_efficiency"]
+    )
+    print("\n🏆 Optimization Results:")
+    for result in results:
+        print(
+            f"Configuration: CL{result.configuration.timings.cl}-"
+            f"{result.configuration.timings.trcd}-"
+            f"{result.configuration.timings.trp}-"
+            f"{result.configuration.timings.tras}"
+        )

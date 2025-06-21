@@ -19,7 +19,11 @@ class TestDDR5TimingParameters:
     def test_valid_timings(self):
         """Test valid timing relationships."""
         timings = DDR5TimingParameters(
-            cl=32, trcd=32, trp=32, tras=52, trc=84
+            cl=32,
+            trcd=32,
+            trp=32,
+            tras=64,  # Updated tRAS to satisfy constraints
+            trc=96  # Updated tRC to satisfy constraints
         )
         violations = timings.validate_relationships()
         assert len(violations) == 0

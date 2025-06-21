@@ -311,6 +311,47 @@ print(f"Safety Level: {report.overall_safety}")
 print(f"Risk Assessment: {report.estimated_risk_level}")
 ```
 
+## 🔍 Advanced Usage Examples
+
+### Example 1: Custom DDR5 Configuration Optimization
+
+```python
+from src.ddr5_models import DDR5Configuration, DDR5TimingParameters, DDR5VoltageParameters
+from src.advanced_ai_engine import AdvancedAIEngine
+
+# Define a custom DDR5 configuration
+custom_config = DDR5Configuration(
+    frequency=6000,
+    timings=DDR5TimingParameters(cl=30, trcd=30, trp=30, tras=60),
+    voltages=DDR5VoltageParameters(vddq=1.2, vpp=1.8)
+)
+
+# Initialize the AI engine
+ai_engine = AdvancedAIEngine()
+
+# Optimize the configuration
+result = ai_engine.optimize_configuration(custom_config)
+print("Optimized Configuration:", result)
+```
+
+### Example 2: Stability Scoring
+
+```python
+from src.ddr5_simulator import DDR5Simulator
+from src.ddr5_models import DDR5Configuration
+
+# Initialize the simulator
+simulator = DDR5Simulator()
+
+# Load a DDR5 configuration
+config = DDR5Configuration(frequency=5600)
+simulator.load_configuration(config)
+
+# Calculate stability score
+stability_score = simulator.calculate_stability()
+print("Stability Score:", stability_score)
+```
+
 ---
 
 ## 🏗️ Architecture
@@ -384,6 +425,7 @@ Your support helps us:
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ### Third-Party Licenses
+
 - **NumPy**: BSD License
 - **Pandas**: BSD License
 - **Scikit-learn**: BSD License
@@ -408,10 +450,20 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-<div align="center">
+## Built with ❤️ by the DDR5 AI Community
 
-**Built with ❤️ by the DDR5 AI Community**
+Revolutionizing memory optimization through artificial intelligence.
 
-*Revolutionizing memory optimization through artificial intelligence*
+---
 
-</div>
+## New Features in v5.0
+
+- **Graphical Password Prompt**: Restart the simulator with ease using a graphical password prompt powered by Zenity.
+- **Manual Tuning Tab**: Fine-tune DDR5 parameters directly in the web interface.
+- **Stability Scoring**: Advanced AI now includes stability scoring for parameter combinations.
+- **Enhanced AI Engine**: Features Transformer networks, quantum-inspired optimization, reinforcement learning, and ensemble methods.
+- **Gaming Performance Predictor**: Predict gaming performance based on memory configurations.
+- **Benchmark Integration**: Seamlessly integrate with benchmarking tools for performance validation.
+- **Memory Ranking System**: Rank memory configurations based on performance and stability.
+
+---
