@@ -4,23 +4,16 @@ Enhanced interface showcasing all advanced AI capabilities.
 """
 
 import streamlit as st
-import plotly.graph_objects as go
-import plotly.express as px
-import pandas as pd
-import numpy as np
-from typing import Dict, Any
-import time
-
-from .ddr5_models import (DDR5Configuration, DDR5TimingParameters, 
-                         DDR5VoltageParameters)
-from .ddr5_simulator import DDR5Simulator
+from .ddr5_models import DDR5Configuration, DDR5TimingParameters, DDR5VoltageParameters
+from .hardware_detection import detect_system_memory
+from .ram_database import get_database
+from .live_tuning_safety import LiveTuningSafetyValidator
 from .perfect_ai_optimizer import PerfectDDR5Optimizer
-from .hardware_detection import detect_system_memory, get_system_summary
-from .ram_database import get_database, DDR5ModuleSpec
-from .cross_brand_tuner import CrossBrandOptimizer, generate_cross_brand_report
-from .live_tuning_safety import (LiveTuningSafetyValidator, LiveTuningSafetyReport, 
-                               SafetyLevel as SafetyLevelEnum, quick_safety_check)
-# from live_tuner import LiveTuner  # TODO: Add live tuning capability
+from .ddr5_simulator import DDR5Simulator
+import time
+import pandas as pd
+import plotly.graph_objs as go
+import plotly.express as px
 
 
 def create_perfect_web_interface():
@@ -129,8 +122,8 @@ def create_perfect_web_interface():
         
         frequency = st.selectbox(
             "Frequency (MT/s)",
-            [3200, 3600, 4000, 4400, 4800, 5200, 5600, 6000, 6400, 6800, 7200, 7600, 8000, 8400],
-            index=6  # Default to DDR5-5600
+            [4000, 4400, 4800, 5200, 5600, 6000, 6400, 6800, 7200, 7600, 8000, 8400],
+            index=4  # Default to DDR5-5600
         )
         
         capacity = st.selectbox("Capacity per stick (GB)", [8, 16, 32, 64], index=1)
@@ -734,7 +727,7 @@ def create_perfect_web_interface():
                 - Pattern Recognition
                 """)
     
-    # Tab 4: Gaming Performance (NEW)
+    # Tab 4: Gaming Performance Predictor
     with tab4:
         st.header("🎮 Gaming Performance Predictor")
         st.info("🎯 **Real-World Gaming**: See how your DDR5 configuration affects actual gaming performance")
@@ -1877,7 +1870,6 @@ VDDQ: {config.voltages.vddq:.2f}V""")
         
         for tip in safety_tips:
             st.info(tip)
-        
         # Safety warnings and disclaimers
         st.error("""
         ⚠️ **CRITICAL WARNING: EXPERIMENTAL FEATURE**
@@ -1894,70 +1886,6 @@ VDDQ: {config.voltages.vddq:.2f}V""")
         - Knowledge of safe DDR5 limits
         """)
         
-        # Safety acknowledgment
-        safety_acknowledged = st.checkbox(
-            "🛡️ I understand the risks and want to proceed with live tuning",
-            key="safety_acknowledgment"
-        )
-        
-        if not safety_acknowledged:
-            st.warning("Please acknowledge the safety warnings to continue.")
-            return
-        
-        # Safety level selection
-        col_safety1, col_safety2 = st.columns(2)
-        
-        with col_safety1:
-            st.subheader("🛡️ Safety Configuration")
-            
-            safety_level = st.selectbox(
-                "Protection Level:",
-                ["conservative", "moderate", "aggressive", "expert"],
-                index=0,
-                help="Conservative: Safest limits, Moderate: Balanced, Aggressive: Higher limits, Expert: Maximum flexibility"
-            )
-            
-            # Safety limits display
-            if safety_level == "conservative":
-                st.info("""
-                **Conservative Limits:**
-                - Max VDDQ: 1.25V
-                - Max Temp: 75°C
-                - Extensive monitoring
-                """)
-            elif safety_level == "moderate":
-                st.info("""
-                **Moderate Limits:**
-                - Max VDDQ: 1.35V
-                - Max Temp: 80°C
-                - Balanced protection
-                """)
-            elif safety_level == "aggressive":
-                st.warning("""
-                **Aggressive Limits:**
-                - Max VDDQ: 1.40V
-                - Max Temp: 83°C
-                - Reduced safety margins
-                """)
-            else:  # expert
-                st.error("""
-                **
-                - Max VDDQ: 1.45V
-                - Max Temp: 85°C
-                - Minimal protection
-                """)
-        
-        with col_safety2:
-            st.subheader("📋 Safety Recommendations")
-            
-            recommendations = get_safety_recommendations()
-            for rec in recommendations[:5]:  # Show first 5
-                st.write(f"• {rec}")
-            
-            with st.expander("See all recommendations"):
-                for rec in recommendations[5:]:
-                    st.write(f"• {rec}")
-        
         # Initialize/Start Live Tuner
         col_control1, col_control2, col_control3 = st.columns(3)
         
@@ -1968,6 +1896,7 @@ VDDQ: {config.voltages.vddq:.2f}V""")
                     st.success("✅ Live tuner initialized!")
                 except Exception as e:
                     st.error(f"❌ Failed to initialize: {e}")
+
         
         with col_control2:
             if st.session_state.live_tuner and st.button("📊 Start Monitoring"):
@@ -2045,7 +1974,7 @@ VDDQ: {config.voltages.vddq:.2f}V""")
                 st.write("**Test Custom Configuration:**")
                 
                 test_freq = st.number_input("Frequency (MT/s)", 
-                                          min_value=3200, max_value=8400, 
+                                          min_value=4000, max_value=8400, 
                                           value=5600, step=200)
                 
                 test_cl = st.number_input("CAS Latency", 
@@ -2165,11 +2094,12 @@ VDDQ: {config.voltages.vddq:.2f}V""")
             
             if use_custom:
                 sim_frequency = st.number_input("Test Frequency (MT/s)", 
-                                              min_value=3200, max_value=8400, 
+                                              min_value=4000, max_value=8400, 
                                               value=frequency, step=200)
                 sim_cl = st.number_input("Test CAS Latency", 
                                         min_value=16, max_value=60, 
                                         value=36, step=2)
+                
                 sim_vddq = st.number_input("Test VDDQ (V)", 
                                           min_value=1.05, max_value=1.45, 
                                           value=1.25, step=0.05)
