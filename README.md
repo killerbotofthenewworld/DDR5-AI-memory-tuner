@@ -228,7 +228,7 @@ Enjoy exploring and optimizing DDR5 memory with ease!
 ### Quick Installation (Recommended)
 
 ```bash
-# 1. Clone the revolutionary AI platform
+# 1. Clone and run the revolutionary AI platform
 git clone https://github.com/killerbotofthenewworld/ddr5-ai-sandbox-simulator.git
 cd ddr5-ai-sandbox-simulator
 
