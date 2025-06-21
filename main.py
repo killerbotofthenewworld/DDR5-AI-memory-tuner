@@ -11,7 +11,7 @@ from pathlib import Path
 src_path = Path(__file__).parent / "src"
 sys.path.append(str(src_path))
 
-from src.perfect_web_interface import create_perfect_web_interface
+from src.web_interface import create_perfect_web_interface
 
 
 def main():

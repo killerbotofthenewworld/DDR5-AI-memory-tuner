@@ -43,6 +43,23 @@ streamlit run main.py
 
 ## 🚀 Quick Guide
 
+### Fedora RPM Installation (Recommended)
+
+For Fedora users, install the pre-built RPM package:
+
+```bash
+# Download the latest RPM from releases or build locally
+sudo rpm -i --nodeps ddr5-ai-sandbox-simulator-5.0.0-1.fc42.noarch.rpm
+
+# The app will appear in your applications menu as "DDR5 AI Simulator"
+# Or launch from terminal:
+launch_ddr5
+# Or use the command-line interface:
+ddr5-simulator
+```
+
+### Manual Installation
+
 Follow these steps to get started with the DDR5 AI Sandbox Simulator:
 
 1. **Clone the Repository**
@@ -525,3 +542,24 @@ You can now install the DDR5 AI Sandbox Simulator as a true desktop application 
 ```bash
 sudo dnf remove ddr5-simulator
 ```
+
+---
+
+## 🛡️ Enhanced Safety System
+
+- **Comprehensive Safety Warnings**: Multi-level warnings for live tuning operations
+- **Real-time Safety Validation**: DDR5 voltage and timing compliance checking
+- **Hardware Damage Prevention**: Automatic range validation for safe operation
+- **Emergency Controls**: Instant stop and reset functionality
+- **Safety Acknowledgment System**: Multi-checkpoint confirmation for dangerous operations
+- **Risk Assessment Dashboard**: Real-time monitoring of system stability factors
+
+**Live Tuning Safety Features:**
+- 🚨 Critical warning banners for immediate risks
+- ⚠️ Real-time voltage range validation (VDDQ 1.0-1.4V, VPP 1.8-2.0V)
+- 🔒 Multi-step safety acknowledgment before enabling dangerous features
+- 🛑 Emergency stop controls for instant system protection
+- 📋 Comprehensive safety checklist and procedures
+- ⚖️ Legal disclaimers and risk acceptance protocols
+
+---

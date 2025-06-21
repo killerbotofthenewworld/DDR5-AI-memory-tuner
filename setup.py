@@ -27,7 +27,7 @@ except FileNotFoundError:
 
 setup(
     name="ddr5-ai-sandbox-simulator",
-    version="3.0.0",
+    version="5.0.0",
     author="DDR5 AI Sandbox Simulator Team",
     author_email="",
     description="The Ultimate AI-Powered DDR5 Memory Tuning Simulator Without Hardware Requirements",

@@ -11,7 +11,7 @@ import time
 import random
 
 from .ddr5_models import DDR5Configuration, DDR5TimingParameters, DDR5VoltageParameters
-from hardware_detection import DetectedRAMModule
+from .hardware_detection import DetectedRAMModule
 
 
 class SafetyLevel(Enum):
