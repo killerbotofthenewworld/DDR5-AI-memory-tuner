@@ -1,5 +1,5 @@
 """
-Live tuning tab for real-time optimization.
+Live tuning tab for real-time optimization with hardware integration.
 """
 
 import streamlit as st
@@ -7,8 +7,13 @@ import pandas as pd
 import plotly.graph_objs as go
 import time
 import random
+from datetime import datetime, timedelta
 from src.ddr5_models import DDR5Configuration
 from src.live_tuning_safety import LiveTuningSafetyValidator
+from src.live_hardware_tuning import LiveHardwareTuner
+
+# Safety lock duration in seconds (15 minutes = 900 seconds)
+SAFETY_LOCK_DURATION = 900
 
 
 def render_live_tuning_tab(config: DDR5Configuration):
@@ -74,57 +79,202 @@ def render_live_tuning_tab(config: DDR5Configuration):
         or system instability. Use at your own risk!
         """)
     
-    # Live tuning controls
-    st.subheader("🎛️ Live Tuning Controls")
+    # Hardware integration setup
+    if 'live_hardware_tuner' not in st.session_state:
+        st.session_state.live_hardware_tuner = LiveHardwareTuner()
     
-    # Safety validator
-    safety_validator = LiveTuningSafetyValidator()
+    hardware_tuner = st.session_state.live_hardware_tuner
     
-    safety_col1, safety_col2 = st.columns(2)
+    # 15-minute safety lock system
+    st.subheader("🔒 15-Minute Safety Lock")
     
-    with safety_col1:
-        st.subheader("🛡️ Safety Status")
-        
-        # Check system readiness
-        if st.button("🔍 Check System Readiness"):
-            with st.spinner("Analyzing system safety..."):
-                time.sleep(2)
-                
-                safety_checks = {
-                    "Memory Stability": random.choice([True, True, False]),
-                    "Temperature Normal": random.choice([True, True, False]),
-                    "Voltage Stable": random.choice([True, True, False]),
-                    "No Errors Detected": random.choice([True, True, False]),
-                    "BIOS Compatible": random.choice([True, False])
-                }
-                
-                all_safe = all(safety_checks.values())
-                
-                if all_safe:
-                    st.success("✅ System ready for live tuning")
-                else:
-                    st.error("❌ System not ready - resolve issues first")
-                
-                for check, status in safety_checks.items():
-                    if status:
-                        st.success(f"✅ {check}")
-                    else:
-                        st.error(f"❌ {check}")
+    # Initialize safety lock timestamp if not exists
+    if 'safety_lock_start_time' not in st.session_state:
+        st.session_state.safety_lock_start_time = None
+        st.session_state.safety_lock_acknowledged = False
     
-    with safety_col2:
-        st.subheader("📊 System Monitoring")
+    # Check if safety lock is active
+    safety_lock_active = True
+    remaining_time = 0
+    
+    if st.session_state.safety_lock_start_time:
+        elapsed_time = time.time() - st.session_state.safety_lock_start_time
+        remaining_time = max(0, SAFETY_LOCK_DURATION - elapsed_time)
+        safety_lock_active = remaining_time > 0
+    
+    if safety_lock_active:
+        if st.session_state.safety_lock_start_time is None:
+            # Safety lock not started yet
+            st.error("🔒 **SAFETY LOCK ACTIVE**: Live tuning is locked for your protection!")
+            
+            st.warning("""
+            **⏰ 15-MINUTE MANDATORY WAITING PERIOD**
+            
+            Before accessing live hardware tuning, you must wait 15 minutes. This safety period ensures:
+            - 📚 You have time to read all safety documentation
+            - 💾 You can save all important work 
+            - 🛡️ You understand the serious risks involved
+            - 🔧 You have prepared recovery tools (CMOS reset knowledge)
+            - 🎯 You are mentally prepared for potential system instability
+            """)
+            
+            if st.button("🚨 START 15-MINUTE SAFETY COUNTDOWN", type="primary"):
+                st.session_state.safety_lock_start_time = time.time()
+                st.success("⏰ Safety countdown started! Please use this time to prepare.")
+                st.rerun()
+        else:
+            # Safety lock in progress
+            minutes_remaining = int(remaining_time // 60)
+            seconds_remaining = int(remaining_time % 60)
+            
+            st.error(f"🔒 **SAFETY LOCK ACTIVE**: {minutes_remaining:02d}:{seconds_remaining:02d} remaining")
+            
+            progress = 1.0 - (remaining_time / SAFETY_LOCK_DURATION)
+            st.progress(progress)
+            
+            st.info(f"""
+            **⏳ PREPARATION TIME REMAINING: {minutes_remaining:02d}:{seconds_remaining:02d}**
+            
+            **Use this time to:**
+            - 📖 Read all safety warnings below
+            - 💾 Save ALL important work and close applications  
+            - 🔧 Learn how to reset CMOS on your motherboard
+            - 🌡️ Check system temperatures are normal
+            - ⚡ Ensure stable power supply (UPS recommended)
+            - 🧠 Mentally prepare for potential system crashes
+            """)
+            
+            # Auto-refresh every second
+            time.sleep(1)
+            st.rerun()
+    else:
+        # Safety lock expired - show final confirmation
+        st.success("✅ **15-MINUTE SAFETY PERIOD COMPLETED**")
         
-        # Real-time monitoring
-        monitoring_placeholder = st.empty()
+        if not st.session_state.safety_lock_acknowledged:
+            st.warning("""
+            **🎯 FINAL SAFETY CONFIRMATION**
+            
+            You have completed the 15-minute safety preparation period.
+            Live hardware tuning will now be available, but you must acknowledge:
+            """)
+            
+            final_checks = []
+            final_checks.append(st.checkbox("🚨 I have saved ALL my work and closed important applications"))
+            final_checks.append(st.checkbox("🔧 I know how to reset CMOS if my system fails to boot"))
+            final_checks.append(st.checkbox("🌡️ I have verified system temperatures are normal and stable"))
+            final_checks.append(st.checkbox("⚖️ I accept FULL RESPONSIBILITY for any hardware damage"))
+            final_checks.append(st.checkbox("💀 I understand this can PERMANENTLY DAMAGE my memory"))
+            
+            if all(final_checks):
+                if st.button("🔓 UNLOCK LIVE HARDWARE TUNING - I AM READY", type="primary"):
+                    st.session_state.safety_lock_acknowledged = True
+                    st.success("🔓 Live hardware tuning unlocked! Exercise extreme caution.")
+                    st.rerun()
+            else:
+                st.error("⚠️ You must acknowledge all final safety confirmations")
+    
+    # Only show hardware controls if safety lock is disabled and acknowledged
+    if not safety_lock_active and st.session_state.safety_lock_acknowledged:
         
-        if st.button("📈 Start Real-time Monitoring"):
-            st.session_state.live_monitoring = True
+        # Live tuning controls
+        st.subheader("🎛️ Live Tuning Controls")
         
-        if st.button("⏹️ Stop Monitoring"):
-            st.session_state.live_monitoring = False
+        # Hardware status and initialization
+        hardware_col1, hardware_col2 = st.columns(2)
         
-        if st.session_state.get('live_monitoring', False):
-            show_live_monitoring(monitoring_placeholder)
+        with hardware_col1:
+            st.subheader("🖥️ Hardware Status")
+            
+            # Initialize hardware button
+            if not hardware_tuner.hardware_initialized:
+                if st.button("🔌 Initialize Hardware Interface"):
+                    with st.spinner("Initializing hardware interface..."):
+                        success = hardware_tuner.initialize_hardware()
+                        if success:
+                            st.success("✅ Hardware interface initialized")
+                            st.rerun()
+                        else:
+                            st.error("❌ Hardware initialization failed")
+            else:
+                # Show hardware status
+                hardware_status = hardware_tuner.get_hardware_status()
+                
+                status_color = {
+                    "ready": "🟢",
+                    "unsafe": "🔴", 
+                    "error": "⭕",
+                    "not_initialized": "⚫"
+                }.get(hardware_status["status"], "⚪")
+                
+                st.write(f"{status_color} **Status:** {hardware_status['status'].upper()}")
+                st.write(f"💻 **Platform:** {hardware_status.get('platform', 'Unknown')}")
+                st.write(f"📝 **Message:** {hardware_status.get('message', 'No message')}")
+                
+                # Show capabilities if available
+                if 'capabilities' in hardware_status:
+                    caps = hardware_status['capabilities']
+                    st.write("**Capabilities:**")
+                    st.write(f"- Memory Control: {'✅' if caps['memory_control'] else '❌'}")
+                    st.write(f"- Voltage Control: {'✅' if caps['voltage_control'] else '❌'}")
+                    st.write(f"- Temperature Monitoring: {'✅' if caps['temperature_monitoring'] else '❌'}")
+        
+        with hardware_col2:
+            st.subheader("🛡️ Safety Status")
+            
+            if hardware_tuner.hardware_initialized:
+                if st.button("🔍 Check System Safety"):
+                    with st.spinner("Checking system safety..."):
+                        hardware_status = hardware_tuner.get_hardware_status()
+                        safety_info = hardware_status.get('safety', {})
+                        
+                        safety_checks = {
+                            "Temperature Safe": safety_info.get('temperature_safe', False),
+                            "Memory Stable": safety_info.get('memory_stable', False),
+                            "Power Stable": safety_info.get('power_stable', False),
+                            "Backup Created": safety_info.get('backup_created', False)
+                        }
+                        
+                        all_safe = all(safety_checks.values())
+                        
+                        if all_safe:
+                            st.success("✅ System ready for live tuning")
+                        else:
+                            st.error("❌ System not ready - resolve issues first")
+                        
+                        for check, status in safety_checks.items():
+                            if status:
+                                st.success(f"✅ {check}")
+                            else:
+                                st.error(f"❌ {check}")
+            else:
+                st.info("🔌 Initialize hardware interface first")
+    
+    # Session management
+    session_status = hardware_tuner.get_session_status()
+    if session_status:
+        st.subheader("📊 Live Tuning Session")
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            st.metric("Duration", f"{session_status['duration']:.0f}s")
+        with col2:
+            st.metric("Changes Applied", session_status['changes_applied'])
+        with col3:
+            st.metric("Safety Violations", session_status['safety_violations'])
+        
+        # Session controls
+        if session_status['active']:
+            if st.button("🛑 Stop Live Session"):
+                hardware_tuner.stop_session()
+                st.success("✅ Live tuning session stopped")
+                st.rerun()
+        else:
+            if st.button("🚀 Start Live Session"):
+                success = hardware_tuner.start_live_session(config)
+                if success:
+                    st.success("✅ Live tuning session started!")
+                    st.rerun()
     
     st.divider()
     
@@ -166,116 +316,16 @@ def render_live_tuning_tab(config: DDR5Configuration):
         else:
             st.error("⚠️ You must acknowledge all safety requirements to enable live tuning")
     else:
-        # Live tuning controls
-        tuning_col1, tuning_col2 = st.columns(2)
-        
-        with tuning_col1:
-            st.subheader("🚀 Primary Timings")
-            st.warning("⚠️ TIMING WARNING: Aggressive timings can cause instability!")
-            st.info("💡 TIP: Decrease values for performance, increase for stability")
-            
-            live_cl = st.slider(
-                "Live CL Adjustment",
-                min_value=-5, max_value=5, value=0,
-                help="⚠️ Adjust CAS Latency - Lower = faster but less stable"
-            )
-            
-            live_trcd = st.slider(
-                "Live tRCD Adjustment",
-                min_value=-5, max_value=5, value=0,
-                help="⚠️ Adjust RAS-to-CAS delay - Can cause memory errors"
-            )
-            
-            live_trp = st.slider(
-                "Live tRP Adjustment",
-                min_value=-5, max_value=5, value=0,
-                help="⚠️ Adjust Row Precharge - Can cause data corruption"
-            )
-            
-            # Real-time timing safety warnings
-            if live_cl < -3 or live_trcd < -3 or live_trp < -3:
-                st.error("🚨 DANGER: Very aggressive timings - High crash risk!")
-            elif live_cl < -1 or live_trcd < -1 or live_trp < -1:
-                st.warning("⚠️ CAUTION: Aggressive timings - Test thoroughly!")
-            elif live_cl == 0 and live_trcd == 0 and live_trp == 0:
-                st.success("✅ Safe defaults - No timing changes applied")
-            else:
-                st.info("ℹ️ Conservative changes - Lower risk but test stability")
-        
-        with tuning_col2:
-            st.subheader("⚡ Voltage Adjustment")
-            st.error("🚨 VOLTAGE WARNING: Incorrect voltages can PERMANENTLY DAMAGE your memory!")
-            st.warning("DDR5 Safe Ranges: VDDQ 1.0-1.4V, VPP 1.8-2.0V")
-            
-            live_vddq = st.slider(
-                "Live VDDQ Adjustment",
-                min_value=-0.05, max_value=0.05, value=0.0, step=0.01,
-                help="⚠️ DANGER: Adjust core voltage in real-time - Can damage memory!"
-            )
-            
-            live_vpp = st.slider(
-                "Live VPP Adjustment",
-                min_value=-0.05, max_value=0.05, value=0.0, step=0.01,
-                help="⚠️ DANGER: Adjust peripheral voltage in real-time - Can damage memory!"
-            )
-            
-            # Real-time voltage safety check
-            current_vddq = config.voltage.vddq + live_vddq
-            current_vpp = config.voltage.vpp + live_vpp
-            
-            if current_vddq > 1.4 or current_vddq < 1.0:
-                st.error(f"🚨 DANGER: VDDQ {current_vddq:.3f}V is OUTSIDE SAFE RANGE!")
-            elif current_vddq > 1.3:
-                st.warning(f"⚠️ CAUTION: VDDQ {current_vddq:.3f}V is getting high!")
-            else:
-                st.success(f"✅ VDDQ {current_vddq:.3f}V is within safe range")
-                
-            if current_vpp > 2.0 or current_vpp < 1.8:
-                st.error(f"🚨 DANGER: VPP {current_vpp:.3f}V is OUTSIDE SAFE RANGE!")
-            elif current_vpp > 1.95:
-                st.warning(f"⚠️ CAUTION: VPP {current_vpp:.3f}V is getting high!")
-            else:
-                st.success(f"✅ VPP {current_vpp:.3f}V is within safe range")
-        
-        # Critical warning before applying changes
-        st.divider()
-        st.error("🚨 FINAL WARNING: Changes will be applied to your system IMMEDIATELY!")
-        st.warning("💾 Make sure ALL WORK IS SAVED before clicking Apply!")
-        
-        apply_col1, apply_col2, apply_col3 = st.columns([2, 1, 2])
-        
-        with apply_col2:
-            # Apply changes
-            if st.button("⚡ APPLY LIVE CHANGES", type="primary"):
-                st.warning("⏳ Applying changes... System may become unstable!")
-                apply_live_changes(config, live_cl, live_trcd, live_trp, 
-                                 live_vddq, live_vpp)
-        
-        # Emergency controls
-        st.divider()
-        st.subheader("🆘 Emergency Controls")
-        
-        emergency_col1, emergency_col2 = st.columns(2)
-        
-        with emergency_col1:
-            if st.button("🛑 EMERGENCY STOP", type="secondary"):
-                st.session_state.live_tuning_enabled = False
-                st.error("🛑 Live tuning emergency stop activated!")
-                st.info("System reverted to safe defaults")
-                st.rerun()
-                
-        with emergency_col2:
-            if st.button("🔄 RESET TO DEFAULTS", type="secondary"):
-                st.warning("🔄 Resetting all live adjustments to zero...")
-                # Reset all sliders would need session state management
-                st.info("✅ All adjustments reset to safe defaults")
+        # Safety lock is active - show message
+        st.info("🔒 Complete the 15-minute safety preparation period above to access live tuning controls.")
     
     st.divider()
     
-    # Live stress testing
+    # Live stress testing (only available when safety lock is unlocked)
     st.subheader("🔥 Live Stress Testing")
     
-    if st.session_state.get('live_tuning_enabled', False):
+    if (not safety_lock_active and st.session_state.safety_lock_acknowledged and 
+        st.session_state.get('live_tuning_enabled', False) and hardware_tuner.session):
         stress_col1, stress_col2 = st.columns(2)
         
         with stress_col1:
@@ -293,12 +343,16 @@ def render_live_tuning_tab(config: DDR5Configuration):
         with stress_col2:
             if st.button("🔥 Start Live Stress Test"):
                 run_live_stress_test(stress_duration, stress_intensity)
+    else:
+        st.info("🔒 Stress testing requires completed safety preparation and active hardware session.")
     
     # Live performance tracking
     st.subheader("📈 Live Performance Tracking")
     
     if 'live_performance_data' in st.session_state:
         show_live_performance_chart()
+    else:
+        st.info("📊 Performance tracking data will appear here during live tuning sessions.")
     
     # Live tuning history
     st.subheader("📋 Live Tuning History")
@@ -306,95 +360,8 @@ def render_live_tuning_tab(config: DDR5Configuration):
     if 'live_tuning_history' in st.session_state:
         history_df = pd.DataFrame(st.session_state.live_tuning_history)
         st.dataframe(history_df, use_container_width=True)
-
-
-def show_live_monitoring(placeholder):
-    """Show real-time system monitoring."""
-    while st.session_state.get('live_monitoring', False):
-        # Generate mock monitoring data
-        monitoring_data = {
-            "CPU Temp": f"{random.uniform(45, 75):.1f}°C",
-            "Memory Temp": f"{random.uniform(35, 65):.1f}°C",
-            "VDDQ": f"{1.10 + random.uniform(-0.02, 0.02):.3f}V",
-            "VPP": f"{1.80 + random.uniform(-0.01, 0.01):.3f}V",
-            "Memory Errors": random.randint(0, 2),
-            "Performance": f"{random.uniform(95, 105):.1f}%"
-        }
-        
-        with placeholder.container():
-            mon_col1, mon_col2, mon_col3 = st.columns(3)
-            
-            with mon_col1:
-                st.metric("CPU Temp", monitoring_data["CPU Temp"])
-                st.metric("VDDQ", monitoring_data["VDDQ"])
-            
-            with mon_col2:
-                st.metric("Memory Temp", monitoring_data["Memory Temp"])
-                st.metric("VPP", monitoring_data["VPP"])
-            
-            with mon_col3:
-                st.metric("Memory Errors", monitoring_data["Memory Errors"])
-                st.metric("Performance", monitoring_data["Performance"])
-        
-        time.sleep(1)
-
-
-def apply_live_changes(config, cl_adj, trcd_adj, trp_adj, vddq_adj, vpp_adj):
-    """Apply live parameter changes."""
-    with st.spinner("Applying live changes..."):
-        time.sleep(2)
-        
-        # Calculate new values
-        new_cl = config.timings.cl + cl_adj
-        new_trcd = config.timings.trcd + trcd_adj
-        new_trp = config.timings.trp + trp_adj
-        new_vddq = config.voltages.vddq + vddq_adj
-        new_vpp = config.voltages.vpp + vpp_adj
-        
-        # Validate changes
-        safety_check = validate_live_changes(new_cl, new_trcd, new_trp, 
-                                            new_vddq, new_vpp)
-        
-        if safety_check['safe']:
-            st.success("⚡ Live changes applied successfully!")
-            
-            # Log the change
-            if 'live_tuning_history' not in st.session_state:
-                st.session_state.live_tuning_history = []
-            
-            st.session_state.live_tuning_history.append({
-                "Timestamp": time.strftime('%H:%M:%S'),
-                "CL": f"{config.timings.cl} → {new_cl}",
-                "tRCD": f"{config.timings.trcd} → {new_trcd}",
-                "tRP": f"{config.timings.trp} → {new_trp}",
-                "VDDQ": f"{config.voltages.vddq:.3f} → {new_vddq:.3f}",
-                "Status": "Applied"
-            })
-            
-            # Update performance tracking
-            update_live_performance()
-            
-        else:
-            st.error(f"❌ Changes rejected: {safety_check['reason']}")
-
-
-def validate_live_changes(cl, trcd, trp, vddq, vpp):
-    """Validate live parameter changes for safety."""
-    # Basic safety checks
-    if cl < 14 or cl > 60:
-        return {'safe': False, 'reason': 'CL out of safe range'}
-    
-    if vddq < 1.0 or vddq > 1.35:
-        return {'safe': False, 'reason': 'VDDQ out of safe range'}
-    
-    if vpp < 1.7 or vpp > 2.0:
-        return {'safe': False, 'reason': 'VPP out of safe range'}
-    
-    # Timing relationship checks
-    if trp > cl + 10:
-        return {'safe': False, 'reason': 'tRP too high relative to CL'}
-    
-    return {'safe': True, 'reason': 'All checks passed'}
+    else:
+        st.info("📋 Live tuning history will appear here after making hardware adjustments.")
 
 
 def run_live_stress_test(duration, intensity):
@@ -424,28 +391,6 @@ def run_live_stress_test(duration, intensity):
     
     st.success("✅ Stress test passed!")
     return True
-
-
-def update_live_performance():
-    """Update live performance tracking."""
-    if 'live_performance_data' not in st.session_state:
-        st.session_state.live_performance_data = []
-    
-    # Add new performance data point
-    performance_point = {
-        'timestamp': time.time(),
-        'performance': random.uniform(95, 105),
-        'latency': random.uniform(10, 15),
-        'bandwidth': random.uniform(45, 55)
-    }
-    
-    st.session_state.live_performance_data.append(performance_point)
-    
-    # Keep only last 50 points
-    if len(st.session_state.live_performance_data) > 50:
-        st.session_state.live_performance_data = (
-            st.session_state.live_performance_data[-50:]
-        )
 
 
 def show_live_performance_chart():
