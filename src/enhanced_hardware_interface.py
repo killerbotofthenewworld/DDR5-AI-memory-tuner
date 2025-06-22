@@ -13,7 +13,7 @@ from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass, asdict
 from pathlib import Path
 
-from ddr5_models import (
+from src.ddr5_models import (
     DDR5Configuration,
     DDR5TimingParameters,
     DDR5VoltageParameters

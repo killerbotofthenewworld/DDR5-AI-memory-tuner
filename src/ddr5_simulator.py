@@ -8,7 +8,7 @@ from typing import Dict, List, Any
 try:
     from .ddr5_models import DDR5Configuration, DDR5TimingParameters
 except ImportError:
-    from ddr5_models import DDR5Configuration, DDR5TimingParameters
+    from src.ddr5_models import DDR5Configuration, DDR5TimingParameters
 
 
 class DDR5Simulator:

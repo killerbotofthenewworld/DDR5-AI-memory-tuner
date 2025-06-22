@@ -19,7 +19,7 @@ try:
     from advanced_hardware_detector import AdvancedHardwareDetector, MemoryVendor
     from revolutionary_ai_engine import RevolutionaryAIEngine
     from enhanced_hardware_interface import EnhancedHardwareInterface
-    from ddr5_models import (
+    from src.ddr5_models import (
         DDR5Configuration, 
         DDR5TimingParameters, 
         DDR5VoltageParameters

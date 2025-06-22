@@ -26,13 +26,13 @@ import io
 import base64
 
 try:
-    from ddr5_models import DDR5Configuration
-    from ddr5_simulator import DDR5Simulator
-    from ai_optimizer import OptimizationResult
+    from .ddr5_models import DDR5Configuration
+    from .ddr5_simulator import DDR5Simulator
+    from .ai_optimizer import OptimizationResult
 except ImportError:
-    from ddr5_models import DDR5Configuration
-    from ddr5_simulator import DDR5Simulator
-    from ai_optimizer import OptimizationResult
+    from src.ddr5_models import DDR5Configuration
+    from src.ddr5_simulator import DDR5Simulator
+    from src.ai_optimizer import OptimizationResult
 
 logger = logging.getLogger(__name__)
 

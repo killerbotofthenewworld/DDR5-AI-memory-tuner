@@ -21,11 +21,11 @@ from sklearn.metrics import mean_squared_error, r2_score
 import joblib
 
 try:
-    from ddr5_models import DDR5Configuration, PerformanceMetrics
-    from ddr5_simulator import DDR5Simulator
+    from src.ddr5_models import DDR5Configuration, PerformanceMetrics
+    from src.ddr5_simulator import DDR5Simulator
 except ImportError:
-    from ddr5_models import DDR5Configuration, PerformanceMetrics
-    from ddr5_simulator import DDR5Simulator
+    from src.ddr5_models import DDR5Configuration, PerformanceMetrics
+    from src.ddr5_simulator import DDR5Simulator
 
 logger = logging.getLogger(__name__)
 

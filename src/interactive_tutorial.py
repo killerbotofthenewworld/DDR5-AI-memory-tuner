@@ -9,7 +9,7 @@ from enum import Enum
 import json
 import streamlit as st
 
-from ddr5_models import DDR5Configuration, DDR5TimingParameters, DDR5VoltageParameters
+from src.ddr5_models import DDR5Configuration, DDR5TimingParameters, DDR5VoltageParameters
 from configuration_templates import ConfigurationTemplateManager, UseCase
 
 

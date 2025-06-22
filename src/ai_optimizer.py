@@ -18,8 +18,8 @@ try:
     from .ddr5_models import DDR5Configuration
     from .ddr5_simulator import DDR5Simulator
 except ImportError:
-    from ddr5_models import DDR5Configuration
-    from ddr5_simulator import DDR5Simulator
+    from src.ddr5_models import DDR5Configuration
+    from src.ddr5_simulator import DDR5Simulator
 
 logger = logging.getLogger(__name__)
 

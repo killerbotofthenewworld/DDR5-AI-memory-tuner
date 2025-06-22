@@ -17,8 +17,8 @@ import joblib
 import logging
 from pathlib import Path
 
-from ddr5_models import DDR5Configuration, DDR5TimingParameters, DDR5VoltageParameters
-from ddr5_simulator import DDR5Simulator
+from src.ddr5_models import DDR5Configuration, DDR5TimingParameters, DDR5VoltageParameters
+from src.ddr5_simulator import DDR5Simulator
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)

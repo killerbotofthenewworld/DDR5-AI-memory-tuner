@@ -9,7 +9,7 @@ from enum import Enum
 import json
 from pathlib import Path
 
-from ddr5_models import DDR5Configuration, DDR5TimingParameters, DDR5VoltageParameters
+from src.ddr5_models import DDR5Configuration, DDR5TimingParameters, DDR5VoltageParameters
 
 
 class UseCase(Enum):

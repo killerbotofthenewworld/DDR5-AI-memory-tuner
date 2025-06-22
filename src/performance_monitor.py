@@ -14,8 +14,8 @@ from collections import deque
 import numpy as np
 import logging
 
-from ddr5_models import DDR5Configuration
-from ddr5_simulator import DDR5Simulator
+from src.ddr5_models import DDR5Configuration
+from src.ddr5_simulator import DDR5Simulator
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)

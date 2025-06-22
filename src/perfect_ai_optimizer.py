@@ -23,9 +23,9 @@ try:
     from .ddr5_simulator import DDR5Simulator
     from .revolutionary_features import RevolutionaryDDR5Features
 except ImportError:
-    from ddr5_models import (DDR5Configuration, DDR5TimingParameters,
+    from src.ddr5_models import (DDR5Configuration, DDR5TimingParameters,
                              DDR5VoltageParameters)
-    from ddr5_simulator import DDR5Simulator
+    from src.ddr5_simulator import DDR5Simulator
     from revolutionary_features import RevolutionaryDDR5Features
 
 warnings.filterwarnings('ignore')
