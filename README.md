@@ -92,7 +92,13 @@ pytest tests/
 3. Add tests for new features
 4. Submit pull request
 
-## 📄 License
+## � Support the Project
+
+[![Ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/killerbotofthenewworld)
+
+Your support helps fund development and hardware testing for this project!
+
+## �📄 License
 
 MIT License - see [LICENSE](LICENSE) file for details.
 
