@@ -39,8 +39,8 @@ from sklearn.metrics import mean_squared_error, r2_score
 import xgboost as xgb
 import lightgbm as lgb
 
-from .ddr5_models import DDR5Configuration, DDR5TimingParameters, DDR5VoltageParameters
-from .ddr5_simulator import DDR5Simulator
+from ddr5_models import DDR5Configuration, DDR5TimingParameters, DDR5VoltageParameters
+from ddr5_simulator import DDR5Simulator
 
 warnings.filterwarnings('ignore')
 

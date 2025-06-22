@@ -3,8 +3,13 @@ Session state management utilities for the web interface.
 """
 
 import streamlit as st
-from src.ddr5_simulator import DDR5Simulator
-from src.perfect_ai_optimizer import PerfectDDR5Optimizer
+
+try:
+    from ...ddr5_simulator import DDR5Simulator
+    from ...perfect_ai_optimizer import PerfectDDR5Optimizer
+except ImportError:
+    from src.ddr5_simulator import DDR5Simulator
+    from src.perfect_ai_optimizer import PerfectDDR5Optimizer
 
 
 def initialize_session_state():

@@ -6,6 +6,7 @@ Combines all advanced AI techniques into one flawless optimizer.
 import numpy as np
 import pandas as pd
 import warnings
+import logging
 from typing import Dict, List, Tuple, Any
 from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
 from sklearn.neural_network import MLPRegressor
@@ -16,12 +17,20 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
 
-from .ddr5_models import (DDR5Configuration, DDR5TimingParameters, 
-                         DDR5VoltageParameters)
-from .ddr5_simulator import DDR5Simulator
-from .revolutionary_features import RevolutionaryDDR5Features
+try:
+    from .ddr5_models import (DDR5Configuration, DDR5TimingParameters,
+                              DDR5VoltageParameters)
+    from .ddr5_simulator import DDR5Simulator
+    from .revolutionary_features import RevolutionaryDDR5Features
+except ImportError:
+    from ddr5_models import (DDR5Configuration, DDR5TimingParameters,
+                             DDR5VoltageParameters)
+    from ddr5_simulator import DDR5Simulator
+    from revolutionary_features import RevolutionaryDDR5Features
 
 warnings.filterwarnings('ignore')
+
+logger = logging.getLogger(__name__)
 
 
 class PerfectDDR5Optimizer:
@@ -303,6 +312,105 @@ class PerfectDDR5Optimizer:
                 'optimization_goal': optimization_goal
             }
         }
+    
+    def optimize(self, target_frequency: int = None, optimization_goal: str = 'balanced', 
+                 generations: int = 100, population_size: int = 50, 
+                 base_config: DDR5Configuration = None, config: Dict[str, Any] = None) -> Dict[str, Any]:
+        """
+        Optimize DDR5 configuration using genetic algorithm.
+        
+        Args:
+            target_frequency: Target memory frequency
+            optimization_goal: 'performance', 'stability', 'power', or 'balanced'
+            generations: Number of optimization generations
+            population_size: Size of the population
+            base_config: Base configuration (for compatibility)
+            config: Additional config (for compatibility)
+        """
+        try:
+            # Create base configuration if not provided
+            if base_config is None:
+                base_config = DDR5Configuration(
+                    frequency=target_frequency or 5600,
+                    timings=DDR5TimingParameters(),
+                    voltages=DDR5VoltageParameters()
+                )
+            
+            # Generate initial population
+            population = self._generate_population(
+                population_size=population_size,
+                target_frequency=target_frequency or base_config.frequency
+            )
+            
+            # Track optimization history
+            optimization_history = []
+            best_config = None
+            best_fitness = 0.0
+            
+            for generation in range(generations):
+                # Evaluate fitness for all configurations
+                fitness_scores = []
+                for config_candidate in population:
+                    fitness = self._evaluate_fitness(config_candidate, optimization_goal)
+                    fitness_scores.append(fitness)
+                    
+                    # Track best configuration
+                    if fitness > best_fitness:
+                        best_fitness = fitness
+                        best_config = config_candidate
+                
+                # Record generation statistics
+                generation_stats = {
+                    'generation': generation,
+                    'best_fitness': best_fitness,
+                    'avg_fitness': np.mean(fitness_scores),
+                    'population_size': len(population)
+                }
+                optimization_history.append(generation_stats)
+                
+                # Early stopping if converged
+                if generation > 10:
+                    recent_improvements = [
+                        optimization_history[-i]['best_fitness'] 
+                        for i in range(1, min(6, len(optimization_history)))
+                    ]
+                    if len(set(recent_improvements)) == 1:  # No improvement in 5 generations
+                        break
+                
+                # Create next generation (simplified)
+                if generation < generations - 1:
+                    # Keep top 20% performers
+                    sorted_indices = np.argsort(fitness_scores)[::-1]
+                    elite_size = max(1, population_size // 5)
+                    new_population = [population[i] for i in sorted_indices[:elite_size]]
+                    
+                    # Fill the rest with mutations of the elite
+                    while len(new_population) < population_size:
+                        parent = population[sorted_indices[np.random.randint(elite_size)]]
+                        mutated = self._mutate_configuration(parent)
+                        new_population.append(mutated)
+                    
+                    population = new_population
+            
+            # Return optimization result
+            return {
+                'best_config': best_config or base_config,
+                'fitness_score': best_fitness,
+                'optimization_history': optimization_history,
+                'generations_completed': len(optimization_history),
+                'converged': len(optimization_history) < generations
+            }
+            
+        except Exception as e:
+            logger.error(f"Optimization failed: {e}")
+            return {
+                'best_config': base_config or DDR5Configuration(),
+                'fitness_score': 0.0,
+                'optimization_history': [],
+                'generations_completed': 0,
+                'converged': False,
+                'error': str(e)
+            }
     
     def _generate_perfect_training_data(self, sample_size: int) -> pd.DataFrame:
         """Generate perfect training data combining database and simulation."""
@@ -657,6 +765,39 @@ class PerfectDDR5Optimizer:
         
         return child1, child2
     
+    def _crossover_configurations(self, parent1: DDR5Configuration, parent2: DDR5Configuration) -> Tuple[DDR5Configuration, DDR5Configuration]:
+        """Perform crossover between two DDR5 configurations."""
+        # Create children by mixing parents
+        child1 = DDR5Configuration(
+            frequency=parent1.frequency if np.random.random() < 0.5 else parent2.frequency,
+            timings=DDR5TimingParameters(
+                cl=parent1.timings.cl if np.random.random() < 0.5 else parent2.timings.cl,
+                trcd=parent1.timings.trcd if np.random.random() < 0.5 else parent2.timings.trcd,
+                trp=parent1.timings.trp if np.random.random() < 0.5 else parent2.timings.trp,
+                tras=parent1.timings.tras if np.random.random() < 0.5 else parent2.timings.tras
+            ),
+            voltages=DDR5VoltageParameters(
+                vddq=parent1.voltages.vddq if np.random.random() < 0.5 else parent2.voltages.vddq,
+                vpp=parent1.voltages.vpp if np.random.random() < 0.5 else parent2.voltages.vpp
+            )
+        )
+        
+        child2 = DDR5Configuration(
+            frequency=parent2.frequency if np.random.random() < 0.5 else parent1.frequency,
+            timings=DDR5TimingParameters(
+                cl=parent2.timings.cl if np.random.random() < 0.5 else parent1.timings.cl,
+                trcd=parent2.timings.trcd if np.random.random() < 0.5 else parent1.timings.trcd,
+                trp=parent2.timings.trp if np.random.random() < 0.5 else parent1.timings.trp,
+                tras=parent2.timings.tras if np.random.random() < 0.5 else parent1.timings.tras
+            ),
+            voltages=DDR5VoltageParameters(
+                vddq=parent2.voltages.vddq if np.random.random() < 0.5 else parent1.voltages.vddq,
+                vpp=parent2.voltages.vpp if np.random.random() < 0.5 else parent1.voltages.vpp
+            )
+        )
+        
+        return child1, child2
+    
     def _intelligent_mutation(
         self, config: DDR5Configuration, mutation_rate: float
     ) -> DDR5Configuration:
@@ -711,6 +852,41 @@ class PerfectDDR5Optimizer:
             voltages=new_voltages
         )
     
+    def _mutate_configuration(self, config: DDR5Configuration, mutation_rate: float = 0.1) -> DDR5Configuration:
+        """Mutate a DDR5 configuration."""
+        # Create a copy of the configuration
+        mutated = DDR5Configuration(
+            frequency=config.frequency,
+            timings=DDR5TimingParameters(
+                cl=config.timings.cl,
+                trcd=config.timings.trcd,
+                trp=config.timings.trp,
+                tras=config.timings.tras
+            ),
+            voltages=DDR5VoltageParameters(
+                vddq=config.voltages.vddq,
+                vpp=config.voltages.vpp
+            )
+        )
+        
+        # Apply mutations based on mutation rate
+        if np.random.random() < mutation_rate:
+            # Mutate frequency
+            freq_change = np.random.choice([-400, -200, 0, 200, 400])
+            mutated.frequency = max(3200, min(8400, config.frequency + freq_change))
+        
+        if np.random.random() < mutation_rate:
+            # Mutate CL
+            cl_change = np.random.randint(-3, 4)
+            mutated.timings.cl = max(20, min(60, config.timings.cl + cl_change))
+        
+        if np.random.random() < mutation_rate:
+            # Mutate VDDQ
+            vddq_change = np.random.uniform(-0.02, 0.02)
+            mutated.voltages.vddq = max(1.0, min(1.3, config.voltages.vddq + vddq_change))
+        
+        return mutated
+
     def _apply_revolutionary_features(
         self, population: List[DDR5Configuration], frequency: int
     ) -> List[DDR5Configuration]:
@@ -1055,3 +1231,165 @@ class PerfectDDR5Optimizer:
                 'ai_evolution_stage': 0,
                 'error': str(e)
             }
+    
+    def _generate_training_data(self, sample_count: int = 1000) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """Generate training data for the AI models."""
+        features = []
+        performance_targets = []
+        stability_targets = []
+        
+        for _ in range(sample_count):
+            # Generate random configuration
+            config = DDR5Configuration(
+                frequency=np.random.choice([3200, 4000, 4800, 5600, 6000, 6400]),
+                timings=DDR5TimingParameters(
+                    cl=np.random.randint(28, 46),
+                    trcd=np.random.randint(28, 46),
+                    trp=np.random.randint(28, 46),
+                    tras=np.random.randint(52, 80)
+                ),
+                voltages=DDR5VoltageParameters(
+                    vddq=np.random.uniform(1.05, 1.25),
+                    vpp=np.random.uniform(1.7, 1.9)
+                )
+            )
+            
+            # Extract features
+            feature_vector = [
+                config.frequency,
+                config.timings.cl,
+                config.timings.trcd,
+                config.timings.trp,
+                config.timings.tras,
+                config.voltages.vddq,
+                config.voltages.vpp
+            ]
+            
+            # Simulate performance as targets
+            performance_result = self.simulator.simulate_performance(config)
+            
+            features.append(feature_vector)
+            performance_targets.append(performance_result['score'])
+            
+            # Calculate stability score based on voltages and timings
+            stability_score = 100.0
+            if config.voltages.vddq > 1.2:
+                stability_score -= (config.voltages.vddq - 1.2) * 50
+            if config.voltages.vpp > 1.85:
+                stability_score -= (config.voltages.vpp - 1.85) * 30
+            if config.timings.cl < 30:
+                stability_score -= (30 - config.timings.cl) * 2
+                
+            stability_targets.append(max(0, min(100, stability_score)))
+        
+        return np.array(features), np.array(performance_targets), np.array(stability_targets)
+
+    def train_models(self) -> bool:
+        """Train all AI models."""
+        try:
+            # Generate training data
+            X, y_performance, y_stability = self._generate_training_data(1000)
+            
+            # Train performance models
+            for name, model in self.performance_models.items():
+                if hasattr(model, 'fit'):
+                    model.fit(X, y_performance)
+            
+            # Train stability models (reuse performance models for now)
+            self.stability_models = self.performance_models.copy()
+            for name, model in self.stability_models.items():
+                if hasattr(model, 'fit'):
+                    model.fit(X, y_stability)
+            
+            self.is_trained = True
+            return True
+            
+        except Exception as e:
+            logger.error(f"Model training failed: {e}")
+            return False
+
+    @property
+    def is_trained(self) -> bool:
+        """Check if models are trained."""
+        return getattr(self, '_is_trained', False)
+    
+    @is_trained.setter
+    def is_trained(self, value: bool):
+        """Set training status."""
+        self._is_trained = value
+
+    def _generate_population(self, population_size: int = 50, base_config: DDR5Configuration = None, target_frequency: int = None) -> List[DDR5Configuration]:
+        """Generate a population of configurations for genetic algorithm."""
+        population = []
+        
+        for _ in range(population_size):
+            if target_frequency:
+                # Generate config with specific frequency
+                config = DDR5Configuration(
+                    frequency=target_frequency,
+                    timings=DDR5TimingParameters(
+                        cl=np.random.randint(28, 46),
+                        trcd=np.random.randint(28, 46),
+                        trp=np.random.randint(28, 46),
+                        tras=np.random.randint(52, 80)
+                    ),
+                    voltages=DDR5VoltageParameters(
+                        vddq=np.random.uniform(1.05, 1.25),
+                        vpp=np.random.uniform(1.7, 1.9)
+                    )
+                )
+            elif base_config:
+                # Mutate base configuration
+                config = DDR5Configuration(
+                    frequency=max(3200, min(8400, base_config.frequency + np.random.randint(-800, 800))),
+                    timings=DDR5TimingParameters(
+                        cl=max(20, min(60, base_config.timings.cl + np.random.randint(-5, 5))),
+                        trcd=max(20, min(60, base_config.timings.trcd + np.random.randint(-5, 5))),
+                        trp=max(20, min(60, base_config.timings.trp + np.random.randint(-5, 5))),
+                        tras=max(40, min(100, base_config.timings.tras + np.random.randint(-10, 10)))
+                    ),
+                    voltages=DDR5VoltageParameters(
+                        vddq=max(1.0, min(1.3, base_config.voltages.vddq + np.random.uniform(-0.05, 0.05))),
+                        vpp=max(1.6, min(2.0, base_config.voltages.vpp + np.random.uniform(-0.05, 0.05)))
+                    )
+                )
+            else:
+                # Generate random configuration
+                config = DDR5Configuration(
+                    frequency=np.random.choice([3200, 4000, 4800, 5600, 6000, 6400]),
+                    timings=DDR5TimingParameters(
+                        cl=np.random.randint(28, 46),
+                        trcd=np.random.randint(28, 46),
+                        trp=np.random.randint(28, 46),
+                        tras=np.random.randint(52, 80)
+                    ),
+                    voltages=DDR5VoltageParameters(
+                        vddq=np.random.uniform(1.05, 1.25),
+                        vpp=np.random.uniform(1.7, 1.9)
+                    )
+                )
+            
+            population.append(config)
+        
+        return population
+
+    def _evaluate_fitness(self, config: DDR5Configuration, optimization_target: str = 'balanced') -> float:
+        """Evaluate the fitness of a configuration based on the optimization target."""
+        try:
+            # Simulate performance
+            performance_result = self.simulator.simulate_performance(config)
+            
+            if optimization_target == 'performance':
+                # Focus on raw performance score
+                return performance_result['score']
+            elif optimization_target == 'stability':
+                # Focus on stability score
+                return performance_result['stability']
+            else:
+                # Balanced fitness
+                return (
+                    performance_result['score'] * 0.7 + 
+                    performance_result['stability'] * 0.3
+                )
+        except Exception:
+            return 0.0

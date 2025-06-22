@@ -3,9 +3,12 @@ DDR5 Memory Simulator
 Core simulation engine for DDR5 memory behavior and performance.
 """
 
-import numpy as np
 from typing import Dict, List, Any
-from .ddr5_models import DDR5Configuration, DDR5TimingParameters
+
+try:
+    from .ddr5_models import DDR5Configuration, DDR5TimingParameters
+except ImportError:
+    from ddr5_models import DDR5Configuration, DDR5TimingParameters
 
 
 class DDR5Simulator:
@@ -45,11 +48,18 @@ class DDR5Simulator:
         Returns:
             Dictionary with bandwidth metrics
         """
-        cache_key = f"bandwidth_{access_pattern}_{queue_depth}"
+        # Include frequency in cache key for different configs
+        freq = self.current_config.frequency
+        cache_key = f"bandwidth_{access_pattern}_{queue_depth}_{freq}"
         if cache_key in self.simulation_cache:
             return self.simulation_cache[cache_key]
         
         base_bandwidth = self.current_config.bandwidth_gbps
+        if base_bandwidth is None:
+            # Calculate theoretical bandwidth: freq * bus_width * channels / 8
+            # DDR5 has 64-bit bus width, typically dual channel = 128 bits
+            base_bandwidth = (self.current_config.frequency * 128) / 8 / 1000
+        
         efficiency = self.performance_coefficients['bandwidth_efficiency']
         
         # Access pattern efficiency
@@ -103,7 +113,13 @@ class DDR5Simulator:
         if cache_key in self.simulation_cache:
             return self.simulation_cache[cache_key]
         
+        # Calculate base latency if not set
         base_latency = self.current_config.latency_ns
+        if base_latency is None:
+            # Calculate latency from timings: CL / (frequency / 2) * 1000
+            # DDR5 frequency is in MT/s, so actual clock = frequency/2 MHz
+            base_latency = (self.current_config.timings.cl / 
+                           (self.current_config.frequency / 2000.0))  # ns
         
         # Access pattern impact
         pattern_penalty = {
@@ -169,12 +185,20 @@ class DDR5Simulator:
         
         total_power = dynamic_power + static_power
         
+        # Calculate bandwidth if not set
+        bandwidth_gbps = self.current_config.bandwidth_gbps
+        if bandwidth_gbps is None:
+            # Calculate theoretical bandwidth: frequency * data_width / 8
+            # DDR5 has 64-bit data width, double data rate
+            bandwidth_gbps = (self.current_config.frequency * 64 * 2) / (8 * 1000)
+        
         result = {
             'dynamic_power_mw': dynamic_power,
             'static_power_mw': static_power,
             'total_power_mw': total_power,
+            'total_power_w': total_power / 1000,  # Convert to watts
             'power_efficiency_mb_per_mw': 
-                (self.current_config.bandwidth_gbps * 1000) / total_power
+                (bandwidth_gbps * 1000) / total_power
         }
         
         self.simulation_cache[cache_key] = result
@@ -247,10 +271,76 @@ class DDR5Simulator:
         Returns:
             Stability score as a float (0.0 to 1.0).
         """
-        from .advanced_ai_engine import AdvancedAIEngine
+        from advanced_ai_engine import AdvancedAIEngine
 
         ai_engine = AdvancedAIEngine()
         return ai_engine.calculate_stability_score(self.current_config)
+    
+    def simulate_performance(
+        self,
+        config: DDR5Configuration = None,
+        temperature: float = 25.0
+    ) -> Dict[str, Any]:
+        """
+        Comprehensive performance simulation for a DDR5 configuration.
+        
+        Args:
+            config: DDR5 configuration to simulate (uses current if None)
+            temperature: Ambient temperature in Celsius
+                (affects stability and power)
+            
+        Returns:
+            Dictionary with comprehensive performance metrics
+        """
+        if config:
+            old_config = self.current_config
+            self.current_config = config
+            # Force recalculation of performance metrics for the new config
+            self.current_config.calculate_performance_metrics()
+        
+        try:
+            # Adjust configuration for temperature
+            thermal_coeff = self.performance_coefficients[
+                'thermal_coefficient']
+            self.current_config.voltages.vddq -= temperature * thermal_coeff
+            self.current_config.voltages.vpp -= temperature * thermal_coeff
+            
+            # Run various simulations
+            bandwidth_results = self.simulate_bandwidth("mixed")
+            latency_results = self.simulate_latency("random")
+            power_results = self.simulate_power_consumption()
+            stability_results = self.run_stability_test()
+            
+            # Calculate overall performance score
+            performance_score = (
+                (bandwidth_results['effective_bandwidth_gbps'] / 100.0) * 40 +
+                (100.0 / latency_results['effective_latency_ns']) * 30 +
+                (100.0 - power_results['total_power_w']) * 15 +
+                stability_results['stability_score'] * 15
+            )
+            
+            # Convert to expected units
+            bw_gbps = bandwidth_results['effective_bandwidth_gbps']
+            bandwidth_mbps = bw_gbps * 1000
+            power_mw = power_results['total_power_w'] * 1000
+            
+            return {
+                'score': min(100.0, max(0.0, performance_score)),
+                'bandwidth': bandwidth_mbps,
+                'latency': latency_results['effective_latency_ns'],
+                'power': power_mw,
+                'stability': stability_results['stability_score'],
+                'detailed_bandwidth': bandwidth_results,
+                'detailed_latency': latency_results,
+                'detailed_power': power_results,
+                'detailed_stability': stability_results,
+                'config': config or self.current_config
+            }
+        
+        finally:
+            # Restore original config if changed
+            if config:
+                self.current_config = old_config
     
     def _calculate_timing_efficiency(self) -> float:
         """Calculate efficiency based on timing parameters."""
@@ -295,7 +385,7 @@ class DDR5Simulator:
         return base_overhead + frequency_overhead
     
     def _get_stability_recommendation(
-        self, 
+        self,
         stability_score: float,
         config_violations: List[str]
     ) -> str:
@@ -317,7 +407,9 @@ class DDR5Simulator:
         if stability_score < 0.7:
             recommendations.append("Consider better cooling solutions")
         if stability_score < 0.8:
-            recommendations.append("Check memory seating and motherboard slots")
+            recommendations.append(
+                "Check memory seating and motherboard slots"
+            )
         
         # Specific recommendations based on common violations
         for violation in config_violations:
@@ -334,3 +426,32 @@ class DDR5Simulator:
             return "No action needed. System is stable."
         
         return " | ".join(recommendations)
+
+    def predict_stability(self, config: DDR5Configuration) -> float:
+        """Predict configuration stability as a single score.
+        
+        Args:
+            config: DDR5 configuration to analyze
+            
+        Returns:
+            Stability score between 0.0 and 1.0
+        """
+        return config.get_stability_estimate() / 100.0
+
+    def estimate_power(self, config: DDR5Configuration) -> float:
+        """Estimate power consumption in watts.
+        
+        Args:
+            config: DDR5 configuration to analyze
+            
+        Returns:
+            Power consumption in watts
+        """
+        # Temporarily set the config and simulate power
+        original_config = self.current_config
+        self.current_config = config
+        try:
+            power_result = self.simulate_power_consumption()
+            return power_result['total_power_w']
+        finally:
+            self.current_config = original_config

@@ -465,7 +465,7 @@ class RevolutionaryDDR5Features:
             vpp = max(1.70, min(1.90, coords[5] / 1000))
             frequency = max(3200, min(8400, int(coords[6] * 100)))
             
-            from .ddr5_models import DDR5Configuration, DDR5TimingParameters, DDR5VoltageParameters
+            from ddr5_models import DDR5Configuration, DDR5TimingParameters, DDR5VoltageParameters
             
             return DDR5Configuration(
                 frequency=frequency,

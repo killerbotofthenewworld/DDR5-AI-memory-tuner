@@ -73,11 +73,39 @@ class DDR5VoltageParameters:
         return violations
 
 
+@dataclass
+class PerformanceMetrics:
+    """Performance metrics for DDR5 memory configurations."""
+    
+    memory_bandwidth: float = 0.0  # GB/s
+    memory_latency: float = 0.0    # nanoseconds
+    stability_score: float = 0.0   # 0-100 scale
+    power_consumption: float = 0.0 # watts
+    temperature: float = 0.0       # celsius
+    signal_integrity: float = 0.0  # 0-100 scale
+    thermal_throttling: bool = False
+    ecc_enabled: bool = False
+    xmp_enabled: bool = False
+    
+    def __post_init__(self):
+        """Validate performance metrics after initialization."""
+        if self.stability_score < 0 or self.stability_score > 100:
+            raise ValueError("Stability score must be between 0 and 100")
+        if self.signal_integrity < 0 or self.signal_integrity > 100:
+            raise ValueError("Signal integrity must be between 0 and 100")
+        if self.memory_bandwidth < 0:
+            raise ValueError("Memory bandwidth cannot be negative")
+        if self.memory_latency < 0:
+            raise ValueError("Memory latency cannot be negative")
+        if self.power_consumption < 0:
+            raise ValueError("Power consumption cannot be negative")
+
+
 class DDR5Configuration(BaseModel):
     """Complete DDR5 memory configuration."""
     
     # Basic specifications
-    frequency: int = Field(default=5600, ge=4000, le=8400, description="Memory frequency in MT/s")
+    frequency: int = Field(default=5600, ge=3200, le=8400, description="Memory frequency in MT/s")
     capacity: int = Field(default=16, description="Capacity per stick in GB")
     rank_count: int = Field(default=1, ge=1, le=2, description="Number of ranks per DIMM")
     
@@ -86,9 +114,7 @@ class DDR5Configuration(BaseModel):
     voltages: DDR5VoltageParameters = Field(default_factory=DDR5VoltageParameters)
     
     # Performance metrics (calculated)
-    bandwidth_gbps: Optional[float] = Field(default=None, description="Theoretical bandwidth in GB/s")
-    latency_ns: Optional[float] = Field(default=None, description="First word latency in ns")
-    stability_score: Optional[float] = Field(default=None, ge=0, le=100, description="Stability score (0-100)")
+    performance_metrics: PerformanceMetrics = Field(default_factory=PerformanceMetrics)
     
     @field_validator('frequency')
     @classmethod
@@ -106,13 +132,13 @@ class DDR5Configuration(BaseModel):
     def calculate_performance_metrics(self) -> None:
         """Calculate bandwidth and latency metrics."""
         # Theoretical bandwidth = frequency * 8 bytes * 2 channels / 1000
-        self.bandwidth_gbps = (self.frequency * 8 * 2) / 1000
+        self.performance_metrics.memory_bandwidth = (self.frequency * 8 * 2) / 1000
         
         # First word latency = CL / (frequency / 2) * 1000 (convert to ns)
         clock_period_ns = 2000 / self.frequency  # DDR uses double data rate
-        self.latency_ns = self.timings.cl * clock_period_ns
+        self.performance_metrics.memory_latency = self.timings.cl * clock_period_ns
     
-    def validate_configuration(self) -> Dict[str, List[str]]:
+    def validate_configuration(self, strict_jedec: bool = False) -> Dict[str, List[str]]:
         """Validate entire configuration and return violations by category."""
         violations = {
             'timing_violations': self.timings.validate_relationships(),
@@ -120,12 +146,13 @@ class DDR5Configuration(BaseModel):
             'general_violations': []
         }
         
-        # Check frequency vs timing compatibility
-        min_cycle_time = 2000 / self.frequency  # ns
-        if self.timings.cl * min_cycle_time < 13.75:  # DDR5 minimum tCL
-            violations['general_violations'].append(
-                f"CL too low for frequency {self.frequency} MT/s"
-            )
+        # Check frequency vs timing compatibility (only in strict mode)
+        if strict_jedec:
+            min_cycle_time = 2000 / self.frequency  # ns
+            if self.timings.cl * min_cycle_time < 13.75:  # DDR5 minimum tCL
+                violations['general_violations'].append(
+                    f"CL too low for frequency {self.frequency} MT/s"
+                )
         
         return violations
     
@@ -161,11 +188,11 @@ class DDR5Configuration(BaseModel):
 
         # Ensure stability_score is always set
         if total_violations > 0:
-            self.stability_score = max(0, 50 - (total_violations * 10))
+            self.performance_metrics.stability_score = max(0, 50 - (total_violations * 10))
         else:
-            self.stability_score = max(0, min(100, margin_score))
+            self.performance_metrics.stability_score = max(0, min(100, margin_score))
         
-        return self.stability_score
+        return self.performance_metrics.stability_score
     
     def validate_jedec_compliance(self) -> Dict[str, List[str]]:
         """Validate configuration against JEDEC DDR5 standards."""
@@ -199,3 +226,55 @@ class DDR5Configuration(BaseModel):
             violations['jedec_voltage_violations'].append(
                 f"VPP ({self.voltages.vpp}V) outside JEDEC range (1.7V - 1.9V)")
         return violations
+    
+    @property
+    def bandwidth_gbps(self) -> float:
+        """Get theoretical bandwidth in GB/s."""
+        if self.performance_metrics.memory_bandwidth == 0:
+            self.calculate_performance_metrics()
+        return self.performance_metrics.memory_bandwidth
+    
+    @property
+    def latency_ns(self) -> float:
+        """Get first word latency in nanoseconds."""
+        if self.performance_metrics.memory_latency == 0:
+            self.calculate_performance_metrics()
+        return self.performance_metrics.memory_latency
+    
+    @property
+    def stability_score(self) -> float:
+        """Get stability score."""
+        return self.performance_metrics.stability_score
+
+
+def validate_ddr5_configuration(config: DDR5Configuration, strict_jedec: bool = False) -> Tuple[bool, Dict[str, List[str]]]:
+    """
+    Validate a DDR5 configuration and return validation results.
+    
+    Args:
+        config: DDR5Configuration to validate
+        strict_jedec: Whether to enforce strict JEDEC compliance
+        
+    Returns:
+        Tuple of (is_valid, violations_dict)
+    """
+    violations = config.validate_configuration()
+    
+    if strict_jedec:
+        jedec_violations = config.validate_jedec_compliance()
+        # Merge all violations
+        all_violations = {**violations, **jedec_violations}
+    else:
+        # Only basic violations, no JEDEC compliance
+        all_violations = violations
+        # Add empty JEDEC violation lists for consistency
+        all_violations.update({
+            'jedec_frequency_violations': [],
+            'jedec_timing_violations': [],
+            'jedec_voltage_violations': []
+        })
+    
+    # Check if any violations exist
+    is_valid = not any(violation_list for violation_list in all_violations.values())
+    
+    return is_valid, all_violations

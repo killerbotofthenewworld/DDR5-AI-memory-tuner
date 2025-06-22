@@ -16,6 +16,8 @@ from .tabs.benchmarks import render_benchmarks_tab
 from .tabs.hardware_detection import render_hardware_detection_tab
 from .tabs.live_tuning import render_live_tuning_tab
 from .tabs.cross_brand_tuning import render_cross_brand_tuning_tab
+from .tabs.enhanced_features import create_enhanced_features_tab
+from .tabs.advanced_integration import create_advanced_integration_tab
 
 
 def create_perfect_web_interface():
@@ -64,17 +66,19 @@ def create_perfect_web_interface():
     config, optimization_settings = render_sidebar()
 
     # Main content tabs
-    tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10 = st.tabs([
+    tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10, tab11, tab12 = st.tabs([
         "⚙️ Manual Tuning",
-        "⚡ Simulation", 
-        "🧠 AI Optimization", 
+        "⚡ Simulation",
+        "🧠 AI Optimization",
         "🎮 Gaming Performance",
-        "� Analysis", 
+        "📊 Analysis",
         "🔬 Revolutionary Features",
-        "� Benchmarks",
-        "💻 Hardware Detection", 
-        "�🔄 Live Tuning",
-        "🔄 Cross-Brand Tuning"
+        "📈 Benchmarks",
+        "💻 Hardware Detection",
+        "⚡ Live Tuning",
+        "🔄 Cross-Brand Tuning",
+        "🚀 Enhanced Features",
+        "🔬 Advanced Integration"
     ])
 
     # Render each tab with full functionality
@@ -107,6 +111,12 @@ def create_perfect_web_interface():
     
     with tab10:
         render_cross_brand_tuning_tab(config)
+    
+    with tab11:
+        create_enhanced_features_tab()
+    
+    with tab12:
+        create_advanced_integration_tab()
 
 
 if __name__ == "__main__":
