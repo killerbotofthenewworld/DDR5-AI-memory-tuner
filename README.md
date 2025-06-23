@@ -1,6 +1,28 @@
 # 🧠 DDR5 AI Sandbox Simulator v6.0.0
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: MIT](https://img.shi### 🎯 M## 📸 Screenshots & Features Demo
+
+### 🎯 Main Interface - Professional Dashboard
+![Main Dashboard](screenshots/Screenshot_20250623_155226.png)
+*Professional DDR5 optimization interface with simulation and AI optimization features*
+
+### 🚀 Enhanced Features Hub - Advanced Tools  
+![Enhanced Features](screenshots/Screenshot_20250623_155423.png)
+*Comprehensive feature hub with dark/light theme, 3D charts, real-time monitoring, and AI assistant*
+
+### 🔧 Live Hardware Integration
+![Live Tuning](screenshots/Screenshot_20250623_155517.png)
+*Real hardware control with safety locks, advanced integration, and comprehensive databases* - Professional Dashboard
+![Main Dashboard](https://github.com/your-repo/ddr5-ai-sandbox-simulator/blob/main/screenshots/Screenshot_20250623_155226.png?raw=true)
+*Professional DDR5 optimization interface with simulation and AI optimization features*
+
+### 🚀 Enhanced Features Hub - Advanced Tools  
+![Enhanced Features](https://github.com/your-repo/ddr5-ai-sandbox-simulator/blob/main/screenshots/Screenshot_20250623_155423.png?raw=true)
+*Comprehensive feature hub with dark/light theme, 3D charts, real-time monitoring, and AI assistant*
+
+### 🔧 Live Hardware Integration
+![Live Tuning](https://github.com/your-repo/ddr5-ai-sandbox-simulator/blob/main/screenshots/Screenshot_20250623_155517.png?raw=true)
+*Real hardware control with safety locks, advanced integration, and comprehensive databases*ge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.9+](https://img.shields.io/badge/Python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![Version](https://img.shields.io/badge/version-6.0.0-blue.svg)](#)
 [![Tests](https://img.shields.io/badge/tests-61%2F72%20passing-green.svg)](#)
@@ -67,7 +89,26 @@ Then run: `./run_ddr5_simulator.sh` (Linux/macOS) or `run_ddr5_simulator.bat` (W
 - MSI Dragon Center compatibility
 - Intel XTU profile conversion
 
-## 💻 System Requirements
+## � Screenshots & Features Demo
+
+### 🎯 Main Interface - Professional Dashboard
+![Main Dashboard](https://github.com/your-repo/ddr5-ai-sandbox-simulator/blob/main/screenshots/main-dashboard.png?raw=true)
+*Professional DDR5 optimization interface with dark/light theme support*
+
+### 🚀 Enhanced Features V2 Tab - All-in-One Hub
+![Enhanced Features](https://github.com/your-repo/ddr5-ai-sandbox-simulator/blob/main/screenshots/enhanced-features.png?raw=true)
+*Comprehensive feature hub with 7 specialized sub-tabs*
+
+### 🎨 Dark/Light Theme & Custom UI
+![Theme Demo](https://github.com/your-repo/ddr5-ai-sandbox-simulator/blob/main/screenshots/theme-demo.png?raw=true)
+*Beautiful theme switching with custom CSS animations and metric cards*
+
+
+
+
+
+
+## �💻 System Requirements
 
 - **Python**: 3.9+
 - **OS**: Linux (full features), Windows/macOS (basic)
