@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=DDR5 AI Sandbox Simulator
+Comment=Launch DDR5 AI Simulator
+Exec=launch_ddr5
+Icon=utilities-terminal
+Terminal=false
+Categories=Utility;

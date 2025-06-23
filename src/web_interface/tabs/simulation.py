@@ -127,7 +127,7 @@ def render_simulation_tab(config: DDR5Configuration) -> None:
             
             result_color = "success" if stability_results['test_result'] == "EXCELLENT" else "warning"
             st.success(f"Result: {stability_results['test_result']}")
-            st.write(f"Stability: {stability_results['final_stability']:.1f}%")
+            st.write(f"Stability: {stability_results['stability_score']:.1f}%")
             st.write(f"Error Rate: {stability_results['error_rate']:.3f}%")
     
     with col_sim3:

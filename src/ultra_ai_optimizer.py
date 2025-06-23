@@ -286,14 +286,14 @@ class UltraAIOptimizer:
             config.rank_count / 4.0,
             config.channel_count / 4.0,
             config.capacity_gb / 128.0,
-            config.memory_type.value / 10.0,  # Assuming enum values
-            config.manufacturer.value / 10.0,
-            1.0 if config.ecc_enabled else 0.0,
-            1.0 if config.xmp_enabled else 0.0,
+            getattr(config, 'memory_type', 1) / 10.0 if hasattr(config, 'memory_type') else 1.0,
+            getattr(config, 'manufacturer', 1) / 10.0 if hasattr(config, 'manufacturer') else 1.0,
+            1.0 if getattr(config.performance_metrics, 'ecc_enabled', False) else 0.0,
+            1.0 if getattr(config.performance_metrics, 'xmp_enabled', False) else 0.0,
             config.temperature / 100.0,
-            config.power_consumption / 50.0,
-            config.signal_integrity / 100.0,
-            config.thermal_throttling / 100.0
+            getattr(config.performance_metrics, 'power_consumption', 0) / 50.0,
+            getattr(config.performance_metrics, 'signal_integrity', 0) / 100.0,
+            getattr(config.performance_metrics, 'thermal_throttling', False) / 100.0 if getattr(config.performance_metrics, 'thermal_throttling', False) else 0.0
         ]
         
         return torch.tensor(features, dtype=torch.float32).to(self.device)

@@ -514,7 +514,10 @@ class AIOptimizer:
         current_metrics = simulator.simulate_performance(current_config)
         
         # Generate suggestions based on AI analysis
-        if current_metrics.memory_bandwidth < 80000:  # Low bandwidth
+        bandwidth = current_metrics.get('memory_bandwidth', 0) if isinstance(current_metrics, dict) else current_metrics.memory_bandwidth
+        latency = current_metrics.get('memory_latency', 0) if isinstance(current_metrics, dict) else current_metrics.memory_latency
+        
+        if bandwidth < 80000:  # Low bandwidth
             suggestions.append({
                 'type': 'frequency',
                 'suggestion': 'Increase memory frequency for better bandwidth',
@@ -522,7 +525,7 @@ class AIOptimizer:
                 'expected_improvement': '10-15% bandwidth increase'
             })
         
-        if current_metrics.memory_latency > 15:  # High latency
+        if latency > 15:  # High latency
             suggestions.append({
                 'type': 'timings',
                 'suggestion': 'Tighten primary timings (CL, tRCD, tRP)',
@@ -530,7 +533,8 @@ class AIOptimizer:
                 'expected_improvement': '5-10% latency reduction'
             })
         
-        if current_metrics.stability_score < 0.8:  # Low stability
+        stability = current_metrics.get('stability_score', 0) if isinstance(current_metrics, dict) else current_metrics.stability_score
+        if stability < 0.8:  # Low stability
             suggestions.append({
                 'type': 'voltage',
                 'suggestion': 'Slightly increase VDDQ voltage for stability',
