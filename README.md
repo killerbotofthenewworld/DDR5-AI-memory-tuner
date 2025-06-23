@@ -103,7 +103,7 @@ streamlit run main.py
 |-----------|---------|-------------|
 | **Python** | 3.9+ | 3.11+ |
 | **OS** | Windows 10/Linux | Ubuntu 22.04+/Fedora 38+ |
-| **RAM** | 8GB | 16GB+ |
+| **RAM** | 0GB | 8-16GB+ |
 | **Storage** | 2GB | 5GB+ |
 | **Hardware Access** | User | Root (for live tuning) |
 | **GPU** | Optional | CUDA/ROCm (for AI acceleration) |
