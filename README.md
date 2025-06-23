@@ -3,7 +3,6 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.9+](https://img.shields.io/badge/Python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![Version](https://img.shields.io/badge/version-6.0.0-blue.svg)](https://github.com/your-repo/ddr5-ai-sandbox-simulator/releases)
-[![Tests](https://img.shields.io/badge/tests-29%2F29%20passing-brightgreen.svg)](https://github.com/your-repo/ddr5-ai-sandbox-simulator/actions)
 [![CI/CD](https://github.com/your-repo/ddr5-ai-sandbox-simulator/workflows/CI%2FCD%20Pipeline/badge.svg)](https://github.com/your-repo/ddr5-ai-sandbox-simulator/actions)
 
 > **Professional AI-Powered DDR5 Memory Optimization Platform**  
