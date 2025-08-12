@@ -41,8 +41,9 @@ chmod +x setup.sh && ./setup.sh
 ```cmd
 git clone https://github.com/your-repo/ddr5-ai-sandbox-simulator.git
 cd ddr5-ai-sandbox-simulator
-setup.bat
+windows\install.bat
 ```
+This creates a real per-user install under %LOCALAPPDATA%, a virtual environment, installs dependencies, and adds Start Menu/Desktop shortcuts.
 
 **Launch:**
 ```bash

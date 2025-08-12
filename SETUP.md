@@ -16,6 +16,16 @@ streamlit run main.py
 ```
 Then open your browser to `http://localhost:8501`
 
+### Windows Installer (Easy)
+
+For a real per-user install on Windows with Start Menu/Desktop shortcuts:
+
+```cmd
+windows\install.bat
+```
+
+This will install to `%LOCALAPPDATA%\DDR5-AI-Sandbox-Simulator` and create a `run_ddr5_simulator.bat` launcher.
+
 ### Option 2: Python Script Mode
 ```bash
 python main.py
