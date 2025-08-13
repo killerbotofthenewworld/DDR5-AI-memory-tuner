@@ -2,8 +2,8 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.9+](https://img.shields.io/badge/Python-3.9+-blue.svg)](https://www.python.org/downloads/)
-[![Version](https://img.shields.io/badge/version-6.0.0-blue.svg)](https://github.com/your-repo/ddr5-ai-sandbox-simulator/releases)
-[![CI/CD](https://github.com/your-repo/ddr5-ai-sandbox-simulator/workflows/CI%2FCD%20Pipeline/badge.svg)](https://github.com/your-repo/ddr5-ai-sandbox-simulator/actions)
+[![Version](https://img.shields.io/badge/version-6.0.0-blue.svg)](https://github.com/killerbotofthenewworld/ddr5-ai-sandbox-simulator/releases)
+[![CI](https://github.com/killerbotofthenewworld/ddr5-ai-sandbox-simulator/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/killerbotofthenewworld/ddr5-ai-sandbox-simulator/actions/workflows/ci-cd.yml)
 
 > **Professional AI-Powered DDR5 Memory Optimization Platform**  
 > Advanced memory tuning with artificial intelligence, real-time hardware integration, 3D visualizations, and comprehensive safety systems.
@@ -28,26 +28,24 @@
 
 ## 🚀 Quick Start
 
-### One-Click Installation
+### Easy install (Windows)
 
-**Linux/macOS:**
+- Double-click `windows/install.bat` (or right-click `windows/install.ps1` → Run with PowerShell)
+- Creates a per-user install under `%LOCALAPPDATA%`, sets up a venv, installs deps, and adds Start Menu/Desktop shortcuts
+- More details in `windows/README-windows.md`
+
+Launch options on Windows:
+
+- From Desktop/Start Menu shortcut “DDR5 AI Sandbox Simulator”, or
+- Run `%LOCALAPPDATA%\DDR5-AI-Sandbox-Simulator\run_ddr5_simulator.bat`
+
+### From source (all platforms)
+
 ```bash
-git clone https://github.com/your-repo/ddr5-ai-sandbox-simulator.git
+git clone https://github.com/killerbotofthenewworld/ddr5-ai-sandbox-simulator.git
 cd ddr5-ai-sandbox-simulator
-chmod +x setup.sh && ./setup.sh
-```
-
-**Windows:**
-```cmd
-git clone https://github.com/your-repo/ddr5-ai-sandbox-simulator.git
-cd ddr5-ai-sandbox-simulator
-windows\install.bat
-```
-This creates a real per-user install under %LOCALAPPDATA%, a virtual environment, installs dependencies, and adds Start Menu/Desktop shortcuts.
-
-**Launch:**
-```bash
-streamlit run main.py
+python -m pip install -r requirements.txt
+python -m streamlit run src/web_interface/main.py --server.port 8521
 ```
 
 ---
@@ -103,10 +101,10 @@ streamlit run main.py
 | Component | Minimum | Recommended |
 |-----------|---------|-------------|
 | **Python** | 3.9+ | 3.11+ |
-| **OS** | Windows 10/Linux | Ubuntu 22.04+/Fedora 38+ |
-| **RAM** | 0GB | 8-16GB+ |
+| **OS** | Windows 10/11 or Linux | Ubuntu 22.04+/Fedora 38+ |
+| **RAM** | 8GB | 16GB+ |
 | **Storage** | 2GB | 5GB+ |
-| **Hardware Access** | User | Root (for live tuning) |
+| **Hardware Access** | User | Admin/Root (for live tuning) |
 | **GPU** | Optional | CUDA/ROCm (for AI acceleration) |
 
 ---
@@ -126,11 +124,10 @@ streamlit run main.py
 ## 🧪 Testing & Quality
 
 ```bash
-# Run comprehensive test suite
+# Run tests
 pytest tests/ -v
-# Expected: 29/29 tests passing (100%)
 
-# Code quality checks  
+# Code quality checks
 black src/ tests/ main.py
 flake8 src/ tests/ main.py
 mypy src/ --ignore-missing-imports
@@ -140,29 +137,26 @@ bandit -r src/
 safety check
 ```
 
-**Current Status:**
-- ✅ **29/29 tests passing** (100% success rate)
-- ✅ **All imports resolved** (no dependency issues)
-- ✅ **Type hints coverage** (90%+ of codebase)
-- ✅ **Security validated** (no known vulnerabilities)
-
 ---
 
 ## 🔒 Safety Features
 
 ### Hardware Protection
+
 - **Multi-level confirmations** before applying changes
 - **Automatic parameter backup** and instant recovery
 - **Real-time validation** of voltage/timing relationships
 - **Emergency stop buttons** with immediate effect
 
 ### AI Safety
+
 - **Bounded optimization** within safe parameter ranges
 - **JEDEC compliance** checking for all configurations
 - **Stability scoring** for parameter combinations
 - **Gradual tuning** with incremental steps
 
 ### System Safety  
+
 - **Privilege escalation** warnings and confirmations
 - **System monitoring** during live tuning sessions
 - **Rollback mechanisms** for failed configurations
@@ -196,8 +190,9 @@ We welcome contributions! Here's how to get started:
 5. **Submit a pull request**
 
 ### Development Setup
+
 ```bash
-git clone https://github.com/your-repo/ddr5-ai-sandbox-simulator.git
+git clone https://github.com/killerbotofthenewworld/ddr5-ai-sandbox-simulator.git
 cd ddr5-ai-sandbox-simulator
 pip install -r requirements.txt -r requirements-dev.txt
 pre-commit install
@@ -210,6 +205,7 @@ pre-commit install
 [![Ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/killerbotofthenewworld)
 
 Your support helps fund:
+
 - **Hardware testing** on diverse platforms
 - **AI model training** and optimization  
 - **New feature development**
@@ -225,17 +221,15 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🔗 Links
 
-- **📖 Documentation**: [GitHub Pages](https://your-repo.github.io/ddr5-ai-sandbox-simulator)
-- **🐛 Bug Reports**: [GitHub Issues](https://github.com/your-repo/ddr5-ai-sandbox-simulator/issues)
-- **💬 Discussions**: [GitHub Discussions](https://github.com/your-repo/ddr5-ai-sandbox-simulator/discussions)  
-- **📦 Releases**: [GitHub Releases](https://github.com/your-repo/ddr5-ai-sandbox-simulator/releases)
+- **📖 Documentation**: GitHub Pages (auto-published from /docs)
+- **🐛 Bug Reports**: <https://github.com/killerbotofthenewworld/ddr5-ai-sandbox-simulator/issues>
+- **💬 Discussions**: <https://github.com/killerbotofthenewworld/ddr5-ai-sandbox-simulator/discussions>
+- **📦 Releases**: <https://github.com/killerbotofthenewworld/ddr5-ai-sandbox-simulator/releases>
 
 ---
 
-<div align="center">
+---
 
-**Built with ❤️ for the DDR5 optimization community**
+Built with ❤️ for the DDR5 optimization community
 
-*Empowering enthusiasts and professionals with AI-driven memory tuning*
-
-</div>
+Empowering enthusiasts and professionals with AI-driven memory tuning
