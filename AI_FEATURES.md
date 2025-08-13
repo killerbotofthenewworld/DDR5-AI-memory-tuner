@@ -120,7 +120,7 @@ Your DDR5 simulator now includes cutting-edge AI technology for **perfect memory
 
 ## 🚀 Ready to Experience AI-Powered DDR5 Tuning?
 
-Your simulator is running at: **http://localhost:8502**
+Your simulator is running at: **http://localhost:8521**
 
 **Next Steps:**
 1. 🧠 Train the AI models (one-time, ~3 minutes)

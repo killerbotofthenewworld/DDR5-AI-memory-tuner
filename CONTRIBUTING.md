@@ -121,7 +121,7 @@ We welcome feature requests! Please:
 3. **Start Development Server**
 
    ```bash
-   streamlit run main.py --server.runOnSave true
+   python -m streamlit run src/web_interface/main.py --server.runOnSave true --server.port 8521
    ```
 
 ## Code Review Process
