@@ -21,8 +21,7 @@ PrivilegesRequired=lowest
 ArchitecturesInstallIn64BitMode=x64
 
 [Files]
-Source: "..\..\*"; DestDir: "{app}"; Flags: recursesubdirs createallsubdirs overwritereadonly ignoreversion
-; Exclude unnecessary directories and files
+; Copy repository contents with exclusions
 Source: "..\..\*"; DestDir: "{app}"; Excludes: ".git\*;__pycache__\*;build\*;dist\*;*.pyc;*.pyo;*.log;*.tmp;test_models\*;tests\*;screenshots\*"; Flags: recursesubdirs createallsubdirs overwritereadonly ignoreversion
 
 [Run]
