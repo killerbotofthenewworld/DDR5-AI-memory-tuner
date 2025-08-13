@@ -70,7 +70,7 @@ launch_ddr5
 git clone https://github.com/killerbotofthenewworld/ddr5-ai-sandbox-simulator.git
 cd ddr5-ai-sandbox-simulator
 pip install -r requirements.txt
-streamlit run main.py
+python -m streamlit run src/web_interface/main.py --server.port 8521
 ```
 
 ## 🏆 Achievement Unlocked

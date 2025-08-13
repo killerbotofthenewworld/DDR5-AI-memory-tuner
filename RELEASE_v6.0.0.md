@@ -168,9 +168,10 @@ cd ddr5-ai-simulator
 pip install -r requirements.txt
 
 # Launch application
-streamlit run main.py
+# Recommended
+python -m streamlit run src/web_interface/main.py --server.port 8521
 
-# Open browser to http://localhost:8501
+# Open browser to http://localhost:8521
 # Navigate to "🚀 Enhanced Features" tab
 # Start with "📚 Interactive Tutorials"
 ```
@@ -187,7 +188,7 @@ pip install -r requirements.txt --upgrade
 rm -rf __pycache__ src/__pycache__
 
 # Launch updated application
-streamlit run main.py
+python -m streamlit run src/web_interface/main.py --server.port 8521
 ```
 
 ---
@@ -355,7 +356,7 @@ Launch the simulator and navigate to the **"🚀 Enhanced Features"** tab to exp
 ---
 
 ### Quick Links
-- 🌐 **Launch Simulator**: `streamlit run main.py`
+- 🌐 **Launch Simulator**: `python -m streamlit run src/web_interface/main.py --server.port 8521`
 - 📚 **Documentation**: See enhanced tutorials tab
 - 🐛 **Report Issues**: GitHub Issues section
 - 💖 **Support Development**: Ko-fi donation button in app
