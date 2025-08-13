@@ -30,26 +30,26 @@ jobs:
         key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
         restore-keys: |
           ${{ runner.os }}-pip-
-    
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
+        pip install -r requirements-dev.txt
         pip install -r requirements.txt
-        pip install pytest pytest-cov black mypy flake8
-    
+
     - name: Run black code formatter check
       run: |
         black --check src/ tests/ main.py || echo "⚠️ Black formatting issues found - continuing pipeline"
       continue-on-error: true
-    
+
     - name: Run flake8 linting
       run: |
-        flake8 src/ tests/ main.py --max-line-length=88 --extend-ignore=E203,W503 || echo "⚠️ Linting issues found - continuing pipeline"
+        flake8 src/ tests/ main.py || echo "⚠️ Linting issues found - continuing pipeline"
       continue-on-error: true
-    
+
     - name: Run type checking with mypy
       run: |
-        mypy src/ --ignore-missing-imports || echo "⚠️ Type checking issues found - continuing pipeline"
+        mypy src/ || echo "⚠️ Type checking issues found - continuing pipeline"
       continue-on-error: true
     
     - name: Run tests with pytest

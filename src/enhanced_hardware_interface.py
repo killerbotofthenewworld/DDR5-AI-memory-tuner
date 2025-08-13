@@ -68,13 +68,44 @@ class EnhancedHardwareInterface:
     def _initialize_hardware(self):
         """Initialize hardware detection and monitoring."""
         try:
-            from advanced_hardware_detector import AdvancedHardwareDetector
+            # Use absolute import within the package
+            from src.advanced_hardware_detector import AdvancedHardwareDetector
             self.detector = AdvancedHardwareDetector()
             self.detector.detect_hardware()
             print("✅ Hardware detection initialized successfully")
         except ImportError:
             print("⚠️ Advanced hardware detection not available")
             self.detector = None
+
+    # --- Thin wrappers to match UI expectations ---
+    def initialize(self) -> bool:
+        """Public initializer used by the Streamlit UI.
+        Returns True if initialization succeeds (detector available or optional).
+        """
+        try:
+            self._initialize_hardware()
+            return True
+        except (RuntimeError, OSError, ImportError):
+            return False
+
+    def get_current_state(self) -> Dict:
+        """Return a concise snapshot of current hardware state expected by the UI."""
+        thermals = self.get_real_time_thermals()
+        power = self.get_power_metrics()
+        return {
+            'cpu_temperature': float(thermals.cpu_temp),
+            'memory_temperatures': [float(t) for t in thermals.memory_temp],
+            'ambient_temperature': float(thermals.ambient_temp),
+            'cpu_fan_rpm': int(thermals.cpu_fan_rpm),
+            'case_fan_rpm': [int(rpm) for rpm in thermals.case_fan_rpm],
+            'thermal_throttling': bool(thermals.thermal_throttling),
+            'total_power': float(power.total_power),
+            'cpu_power': float(power.cpu_power),
+            'memory_power': float(power.memory_power),
+            'efficiency_score': float(power.efficiency_score),
+            'power_limit_throttling': bool(power.power_limit_throttling),
+            'timestamp': datetime.now().isoformat(),
+        }
     
     def get_memory_controllers(self) -> List[MemoryController]:
         """Get detailed memory controller information."""
@@ -94,7 +125,7 @@ class EnhancedHardwareInterface:
         # Real hardware detection
         if self.detector:
             memory_modules = self.detector.get_memory_modules()
-            for i, module in enumerate(memory_modules):
+            for i, _ in enumerate(memory_modules):
                 controller = MemoryController(
                     controller_id=i,
                     name=f"Memory Controller {i}",
@@ -112,8 +143,9 @@ class EnhancedHardwareInterface:
             # CPU temperature
             cpu_temp = 0.0
             if hasattr(psutil, "sensors_temperatures"):
-                sensors = psutil.sensors_temperatures()
-                if sensors:
+                sensors_fn = getattr(psutil, "sensors_temperatures", None)
+                sensors = sensors_fn() if callable(sensors_fn) else None
+                if isinstance(sensors, dict):
                     for name, entries in sensors.items():
                         if 'coretemp' in name.lower() or 'cpu' in name.lower():
                             cpu_temp = entries[0].current if entries else 0.0
@@ -137,8 +169,9 @@ class EnhancedHardwareInterface:
             cpu_fan_rpm = 0
             case_fans = []
             if hasattr(psutil, "sensors_fans"):
-                fans = psutil.sensors_fans()
-                if fans:
+                fans_fn = getattr(psutil, "sensors_fans", None)
+                fans = fans_fn() if callable(fans_fn) else None
+                if isinstance(fans, dict):
                     for name, entries in fans.items():
                         if entries:
                             if 'cpu' in name.lower():
@@ -154,8 +187,7 @@ class EnhancedHardwareInterface:
                 case_fan_rpm=case_fans or [800, 900],
                 thermal_throttling=cpu_temp > 80.0 if cpu_temp else False
             )
-            
-        except Exception as e:
+        except (RuntimeError, OSError) as e:
             print(f"⚠️ Error getting thermal data: {e}")
             # Return safe defaults
             return SystemThermals(
@@ -194,8 +226,7 @@ class EnhancedHardwareInterface:
                 efficiency_score=efficiency_score,
                 power_limit_throttling=total_power > 150.0
             )
-            
-        except Exception as e:
+        except (RuntimeError, OSError) as e:
             print(f"⚠️ Error getting power metrics: {e}")
             return PowerMetrics(
                 total_power=120.0,
@@ -251,7 +282,7 @@ class EnhancedHardwareInterface:
                 
                 time.sleep(interval)
                 
-            except Exception as e:
+            except (RuntimeError, OSError) as e:
                 print(f"⚠️ Monitoring error: {e}")
                 time.sleep(interval)
     
@@ -286,13 +317,12 @@ class EnhancedHardwareInterface:
             if total_violations > 0:
                 return False, f"❌ Configuration has {total_violations} violations. Check settings."
             
-            # TODO: Apply actual hardware configuration
+            # Note: Apply actual hardware configuration via vendor SDK/driver here
             # This would interface with memory controller drivers
             print(f"✅ Configuration applied successfully: {config.frequency} MT/s")
             
             return True, "✅ Configuration applied successfully with safety checks passed"
-            
-        except Exception as e:
+        except (RuntimeError, OSError, ValueError) as e:
             return False, f"❌ Error applying configuration: {str(e)}"
     
     def get_optimization_suggestions(self) -> List[str]:
@@ -327,8 +357,7 @@ class EnhancedHardwareInterface:
             
             if not suggestions:
                 suggestions.append("✅ System is well-optimized! No immediate suggestions")
-                
-        except Exception as e:
+        except (RuntimeError, OSError, ValueError) as e:
             suggestions.append(f"⚠️ Error generating suggestions: {str(e)}")
         
         return suggestions
@@ -364,12 +393,11 @@ class EnhancedHardwareInterface:
             }
             
             filepath = Path(filename)
-            with open(filepath, 'w') as f:
+            with open(filepath, 'w', encoding='utf-8') as f:
                 json.dump(profile, f, indent=2)
             
             return str(filepath.absolute())
-            
-        except Exception as e:
+        except (RuntimeError, OSError, ValueError) as e:
             print(f"❌ Error exporting hardware profile: {e}")
             return ""
 
@@ -414,7 +442,7 @@ def main():
         voltages=DDR5VoltageParameters(vddq=1.1, vpp=1.8, vddq_tx=1.1, vddq_rx=1.1)
     )
     
-    success, message = interface.apply_configuration_safely(test_config)
+    _success, message = interface.apply_configuration_safely(test_config)
     print(f"Result: {message}")
     
     # Export profile

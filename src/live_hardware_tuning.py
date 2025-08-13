@@ -6,11 +6,12 @@ Connects the hardware interface with the live tuning tab for real hardware contr
 import streamlit as st
 import time
 import logging
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 from dataclasses import dataclass
 
-from src.hardware_interface import hardware_manager, HardwareCapabilities, SafetyState
+from src.hardware_interface import hardware_manager, SafetyState
 from src.ddr5_models import DDR5Configuration
+from src.hardware_detection import HardwareDetector, DetectedRAMModule
 
 
 @dataclass
@@ -30,41 +31,66 @@ class LiveHardwareTuner:
     """Manages live hardware tuning operations with safety controls."""
     
     def __init__(self):
-        self.session: Optional[LiveTuningSession] = None
+        self._detector = None
+        self._cached_modules = None
+        self.session = None
         self.hardware_initialized = False
-        self.capabilities: Optional[HardwareCapabilities] = None
+        self.capabilities = None
+        # Lazy-initialized hardware detector and cache for detected modules
         
     def initialize_hardware(self) -> bool:
         """Initialize hardware interface and check capabilities."""
         try:
             success = hardware_manager.initialize()
-            if success:
-                self.capabilities = hardware_manager.capabilities
-                self.hardware_initialized = True
-                return True
-            return False
-        except Exception as e:
+        except (RuntimeError, OSError, ValueError) as e:
             st.error(f"❌ Hardware initialization failed: {e}")
             return False
+
+        if success:
+            self.capabilities = hardware_manager.capabilities
+            self.hardware_initialized = True
+            return True
+        return False
+
+    def detect_modules(self) -> List[DetectedRAMModule]:
+        """Detect installed RAM modules using the cross-platform HardwareDetector.
+
+        Returns:
+            List of detected RAM modules (may be demo data if detection unsupported)
+        """
+        try:
+            if self._cached_modules is not None:
+                return self._cached_modules
+
+            if self._detector is None:
+                self._detector = HardwareDetector()
+
+            modules = self._detector.detect_system_memory()
+            # Cache results for the session to avoid repeated probes
+            self._cached_modules = modules
+            return modules
+        except (RuntimeError, OSError, ValueError) as e:
+            logging.getLogger(__name__).warning("Hardware detection failed: %s", e)
+            return []
     
     def get_hardware_status(self) -> Dict[str, Any]:
         """Get current hardware status for display."""
         if not self.hardware_initialized:
             return {"status": "not_initialized", "message": "Hardware not initialized"}
-        
+
         try:
             status = hardware_manager.get_hardware_status()
             safety_state = hardware_manager.interface.monitor_stability()
-            
-            return {
-                "status": "ready" if self._is_system_safe(safety_state) else "unsafe",
-                "capabilities": status["capabilities"],
-                "safety": safety_state.__dict__,
-                "platform": status["platform"],
-                "message": self._get_status_message(safety_state)
-            }
-        except Exception as e:
+        except (RuntimeError, OSError, ValueError) as e:
             return {"status": "error", "message": f"Status check failed: {e}"}
+
+        return {
+            "status": "ready" if self._is_system_safe(safety_state) else "unsafe",
+            "capabilities": status.get("capabilities", {}),
+            "safety": getattr(safety_state, "__dict__", {}),
+            "platform": status.get("platform", {}),
+            "message": self._get_status_message(safety_state),
+        }
     
     def _is_system_safe(self, safety_state: SafetyState) -> bool:
         """Check if system is safe for live tuning."""
@@ -124,37 +150,38 @@ class LiveHardwareTuner:
         try:
             # Update configuration
             self._update_config_parameter(parameter, value)
-            
+
             # Convert to hardware settings format
             hardware_settings = self._config_to_hardware_settings(self.session.current_config)
-            
+
             # Apply to hardware
             success = hardware_manager.apply_ddr5_settings(hardware_settings)
-            
+
             if success:
                 self.session.changes_applied += 1
                 st.success(f"✅ Applied {parameter} = {value}")
-                
+
                 # Monitor for stability after change
                 time.sleep(1)  # Brief delay for hardware to settle
                 safety_state = hardware_manager.interface.monitor_stability()
-                
+
                 if not self._is_system_safe(safety_state):
                     st.warning("⚠️ System became unstable after change")
                     self.session.safety_violations += 1
                     return False
-                
+
                 return True
             else:
                 st.error(f"❌ Failed to apply {parameter}")
                 return False
-                
-        except Exception as e:
+        except (RuntimeError, OSError, ValueError) as e:
             st.error(f"❌ Error applying adjustment: {e}")
             return False
     
     def _update_config_parameter(self, parameter: str, value: Any):
         """Update configuration parameter."""
+        if not self.session:
+            raise RuntimeError("No active live tuning session")
         config = self.session.current_config
         
         # Map parameter names to config attributes
@@ -196,22 +223,21 @@ class LiveHardwareTuner:
         
         try:
             st.error("🚨 EMERGENCY STOP ACTIVATED")
-            
+
             # Mark session as inactive
             self.session.is_active = False
             self.session.emergency_stops += 1
-            
+
             # Restore from backup
             success = hardware_manager.emergency_restore()
-            
+
             if success:
                 st.success("✅ Emergency restore completed")
                 return True
             else:
                 st.error("❌ Emergency restore failed - manual intervention required")
                 return False
-                
-        except Exception as e:
+        except (RuntimeError, OSError, ValueError) as e:
             st.error(f"❌ Emergency stop failed: {e}")
             return False
     

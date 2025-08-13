@@ -23,17 +23,17 @@ We use GitHub to host code, to track issues and feature requests, as well as acc
 
 ## Code Style
 
-* Follow PEP 8 Python style guidelines
-* Use type hints for all function parameters and return values
-* Include docstrings for all classes and functions
-* Keep line length to 79 characters
-* Use meaningful variable and function names
+- Follow PEP 8 Python style guidelines
+- Use type hints for all function parameters and return values
+- Include docstrings for all classes and functions
+- Keep line length to 79 characters
+- Use meaningful variable and function names
 
 ## Testing
 
-* Write unit tests for new features
-* Ensure all tests pass before submitting PR
-* Maintain test coverage above 80%
+- Write unit tests for new features
+- Ensure all tests pass before submitting PR
+- Maintain test coverage above 80%
 
 ## License
 
@@ -65,30 +65,35 @@ We welcome feature requests! Please:
 ## Areas for Contribution
 
 ### 🧠 AI & Machine Learning
+
 - New optimization algorithms
 - Improved model architectures
 - Enhanced training procedures
 - Performance optimizations
 
 ### 🔬 Hardware Support
+
 - Additional RAM manufacturer support
 - New motherboard compatibility
 - Enhanced hardware detection
 - Expanded databases
 
 ### 🌐 User Interface
+
 - Mobile responsiveness improvements
 - New visualization components
 - Accessibility enhancements
 - Multi-language support
 
 ### 🔒 Safety & Validation
+
 - Enhanced safety checks
 - Improved risk assessment
 - Better error handling
 - Comprehensive testing
 
 ### 📚 Documentation
+
 - Tutorial improvements
 - API documentation
 - Code examples
@@ -97,20 +102,24 @@ We welcome feature requests! Please:
 ## Getting Started
 
 1. **Setup Development Environment**
+
    ```bash
    git clone https://github.com/killerbotofthenewworld/ddr5-ai-sandbox-simulator.git
    cd ddr5-ai-sandbox-simulator
    python -m venv venv
    source venv/bin/activate  # or venv\Scripts\activate on Windows
-   pip install -r requirements.txt
+   pip install -r requirements-dev.txt -r requirements.txt
+   pre-commit install
    ```
 
 2. **Run Tests**
+
    ```bash
    python -m pytest tests/
    ```
 
 3. **Start Development Server**
+
    ```bash
    streamlit run main.py --server.runOnSave true
    ```
@@ -126,14 +135,15 @@ The core team looks at Pull Requests on a regular basis. We will:
 
 ## Community
 
-* Be respectful and inclusive
-* Help newcomers get started
-* Share knowledge and experiences
-* Provide constructive feedback
+- Be respectful and inclusive
+- Help newcomers get started
+- Share knowledge and experiences
+- Provide constructive feedback
 
 ## Recognition
 
 Contributors will be:
+
 - Added to the contributors list
 - Mentioned in release notes
 - Invited to join the core team (for significant contributions)

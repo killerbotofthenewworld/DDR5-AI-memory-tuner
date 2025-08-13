@@ -7,7 +7,6 @@ import pandas as pd
 import plotly.graph_objs as go
 import time
 import random
-from datetime import datetime, timedelta
 from src.ddr5_models import DDR5Configuration
 from src.live_tuning_safety import LiveTuningSafetyValidator
 from src.live_hardware_tuning import LiveHardwareTuner
@@ -84,6 +83,9 @@ def render_live_tuning_tab(config: DDR5Configuration):
         st.session_state.live_hardware_tuner = LiveHardwareTuner()
     
     hardware_tuner = st.session_state.live_hardware_tuner
+    safe_mode = st.session_state.get("safe_mode", True)
+    if 'preflight_passed' not in st.session_state:
+        st.session_state.preflight_passed = False
     
     # 15-minute safety lock system
     st.subheader("🔒 15-Minute Safety Lock")
@@ -174,8 +176,33 @@ def render_live_tuning_tab(config: DDR5Configuration):
             else:
                 st.error("⚠️ You must acknowledge all final safety confirmations")
     
-    # Only show hardware controls if safety lock is disabled and acknowledged
+    # Only show hardware controls if safety lock cleared and acknowledged
     if not safety_lock_active and st.session_state.safety_lock_acknowledged:
+        # Safe Mode: require Dry-Run preflight
+        if safe_mode and not st.session_state.preflight_passed:
+            st.subheader("🔎 Dry-Run Preflight (Safe Mode)")
+            st.info("Run a comprehensive preflight to validate safety before enabling live tuning.")
+            if st.button("🧪 Run Preflight Validation", type="primary"):
+                with st.spinner("Running safety preflight (no changes will be applied)..."):
+                    try:
+                        validator = LiveTuningSafetyValidator()
+                        detected = hardware_tuner.detect_modules() if hasattr(hardware_tuner, 'detect_modules') else []
+                        report = validator.run_comprehensive_safety_test(config, detected)
+                        st.session_state.preflight_report = report
+                        st.session_state.preflight_passed = report.overall_safety.name in ("SAFE", "VERIFIED_SAFE")
+                        if st.session_state.preflight_passed:
+                            st.success("✅ Preflight passed: system considered SAFE for live tuning.")
+                        else:
+                            st.error(f"❌ Preflight did not pass (overall: {report.overall_safety.value}). Resolve issues before proceeding.")
+                    except Exception as e:
+                        st.session_state.preflight_passed = False
+                        st.error(f"Preflight failed to run: {e}")
+            if 'preflight_report' in st.session_state:
+                with st.expander("Preflight Report"):
+                    rep = st.session_state.preflight_report
+                    st.write(f"Overall: {rep.overall_safety} ({rep.overall_score:.2f})")
+                    st.write(rep.safety_recommendations)
+            st.stop()
         
         # Live tuning controls
         st.subheader("🎛️ Live Tuning Controls")
@@ -215,9 +242,9 @@ def render_live_tuning_tab(config: DDR5Configuration):
                 if 'capabilities' in hardware_status:
                     caps = hardware_status['capabilities']
                     st.write("**Capabilities:**")
-                    st.write(f"- Memory Control: {'✅' if caps['memory_control'] else '❌'}")
-                    st.write(f"- Voltage Control: {'✅' if caps['voltage_control'] else '❌'}")
-                    st.write(f"- Temperature Monitoring: {'✅' if caps['temperature_monitoring'] else '❌'}")
+                    st.write(f"- Memory Controller: {'✅' if caps.get('memory_controller') else '❌'}")
+                    st.write(f"- Vendor Tools: {'✅' if caps.get('vendor_tools') else '❌'}")
+                    st.write(f"- UEFI Vars: {'✅' if caps.get('uefi_vars') else '❌'}")
         
         with hardware_col2:
             st.subheader("🛡️ Safety Status")
@@ -226,7 +253,7 @@ def render_live_tuning_tab(config: DDR5Configuration):
                 if st.button("🔍 Check System Safety"):
                     with st.spinner("Checking system safety..."):
                         hardware_status = hardware_tuner.get_hardware_status()
-                        safety_info = hardware_status.get('safety', {})
+                        safety_info = hardware_status.get('safety') or hardware_status.get('safety_state', {})
                         
                         safety_checks = {
                             "Temperature Safe": safety_info.get('temperature_safe', False),

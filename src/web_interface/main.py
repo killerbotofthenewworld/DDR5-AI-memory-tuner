@@ -2,21 +2,28 @@
 Main web interface entry point.
 """
 
+import sys
+from pathlib import Path
 import streamlit as st
 
-from .utils.session_state import initialize_session_state
-from .sidebar import render_sidebar
-from .tabs.manual_tuning import render_manual_tuning_tab
-from .tabs.simulation import render_simulation_tab
-from .tabs.ai_optimization import render_ai_optimization_tab
-from .tabs.gaming import render_gaming_tab
-from .tabs.analysis import render_analysis_tab
-from .tabs.benchmarks import render_benchmarks_tab
-from .tabs.hardware_detection import render_hardware_detection_tab
-from .tabs.live_tuning import render_live_tuning_tab
-from .tabs.cross_brand_tuning import render_cross_brand_tuning_tab
-from .tabs.enhanced_features_v2 import render_enhanced_features_tab
-from .tabs.advanced_integration import create_advanced_integration_tab
+# Ensure repository root is on sys.path when running as a script (e.g., streamlit run src/web_interface/main.py)
+_ROOT = Path(__file__).resolve().parents[2]
+if str(_ROOT) not in sys.path:
+    sys.path.insert(0, str(_ROOT))
+
+from src.web_interface.utils.session_state import initialize_session_state
+from src.web_interface.sidebar import render_sidebar
+from src.web_interface.tabs.manual_tuning import render_manual_tuning_tab
+from src.web_interface.tabs.simulation import render_simulation_tab
+from src.web_interface.tabs.ai_optimization import render_ai_optimization_tab
+from src.web_interface.tabs.gaming import render_gaming_tab
+from src.web_interface.tabs.analysis import render_analysis_tab
+from src.web_interface.tabs.benchmarks import render_benchmarks_tab
+from src.web_interface.tabs.hardware_detection import render_hardware_detection_tab
+from src.web_interface.tabs.live_tuning import render_live_tuning_tab
+from src.web_interface.tabs.cross_brand_tuning import render_cross_brand_tuning_tab
+from src.web_interface.tabs.enhanced_features_v2 import render_enhanced_features_tab
+from src.web_interface.tabs.advanced_integration import create_advanced_integration_tab
 
 
 def create_perfect_web_interface():
@@ -62,7 +69,7 @@ def create_perfect_web_interface():
             """, unsafe_allow_html=True)
 
     # Render sidebar and get configuration
-    config, optimization_settings = render_sidebar()
+    config, _ = render_sidebar()
 
     # Main content tabs
     tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10, tab11 = st.tabs([

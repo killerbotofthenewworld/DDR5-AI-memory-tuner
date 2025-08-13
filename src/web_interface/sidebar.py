@@ -39,6 +39,15 @@ def render_sidebar() -> Tuple[DDR5Configuration, dict]:
         
         st.divider()
         
+        # Safety Mode
+        st.subheader("🛡️ Safety Mode")
+        safe_mode = st.checkbox("Enable Safe Mode (recommended)", value=True)
+        st.session_state["safe_mode"] = safe_mode
+        if safe_mode:
+            st.info("Safe Mode requires a Dry-Run preflight to pass before live tuning.")
+        
+        st.divider()
+        
         # AI Training Section
         st.subheader("🧠 AI Training")
         

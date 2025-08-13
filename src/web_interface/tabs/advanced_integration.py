@@ -7,22 +7,18 @@ import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
 import plotly.express as px
-from typing import Dict, Any, List
-import json
 from datetime import datetime
 import numpy as np
 
-# Import our advanced systems
+# Import our advanced systems (use absolute imports within the package)
 try:
-    import sys
-    sys.path.append('../../')  # Add parent directory to path
-    from advanced_hardware_detector import AdvancedHardwareDetector, MemoryVendor
-    from revolutionary_ai_engine import RevolutionaryAIEngine
-    from enhanced_hardware_interface import EnhancedHardwareInterface
+    from src.advanced_hardware_detector import AdvancedHardwareDetector
+    from src.revolutionary_ai_engine import RevolutionaryAIEngine, OptimizationGoal
+    from src.enhanced_hardware_interface import EnhancedHardwareInterface
     from src.ddr5_models import (
-        DDR5Configuration, 
-        DDR5TimingParameters, 
-        DDR5VoltageParameters
+        DDR5Configuration,
+        DDR5TimingParameters,
+        DDR5VoltageParameters,
     )
 except ImportError as e:
     st.error(f"Import error: {e}")
@@ -149,7 +145,7 @@ def render_hardware_detection_section():
             st.success(f"Hardware profile exported to: {filename}")
             
             # Create download button
-            with open(filename, 'r') as f:
+            with open(filename, 'r', encoding='utf-8') as f:
                 profile_data = f.read()
             
             st.download_button(
@@ -262,16 +258,38 @@ def render_ai_analysis_section():
     
     if st.button("🚀 Optimize with AI", key="optimize_ai_advanced"):
         with st.spinner("Running AI optimization..."):
+            # Map UI selection to engine's OptimizationGoal
+            goal_map = {
+                "performance": OptimizationGoal.PERFORMANCE,
+                "stability": OptimizationGoal.STABILITY,
+                "power_efficiency": OptimizationGoal.EFFICIENCY,
+                "balanced": OptimizationGoal.BALANCED,
+            }
+            goal_enum = goal_map.get(optimization_goal, OptimizationGoal.BALANCED)
+
+            # Use current frequency as target
             result = st.session_state.ai_engine.optimize_revolutionary(
-                base_config=config,
-                goal=optimization_goal
+                target_frequency=int(config.frequency),
+                optimization_goal=goal_enum,
+                max_iterations=50,
             )
             
             st.success("✅ Optimization Complete!")
             
             # Display optimized configuration
             st.write("**Optimized Configuration:**")
-            opt_config = result['optimized_config']
+            # OptimizationResult dataclass -> best candidate
+            best = result.best_candidate
+            opt_config = [
+                best.frequency,
+                best.cl,
+                best.trcd,
+                best.trp,
+                best.tras,
+                best.trc,
+                best.vddq,
+                best.vpp,
+            ]
             
             opt_df = pd.DataFrame({
                 'Parameter': ['Frequency', 'CL', 'tRCD', 'tRP', 'tRAS', 'tRC', 'VDDQ', 'VPP'],
@@ -284,8 +302,9 @@ def render_ai_analysis_section():
             st.dataframe(opt_df, use_container_width=True)
             
             # Show predicted performance improvement
-            pred_perf = result['predicted_performance']
-            st.info(f"🎯 Predicted performance improvement: {pred_perf['performance_score']:.1%}")
+            st.info(
+                f"🎯 Best predicted score: {best.predicted_score:.3f} | Confidence: {best.confidence:.2f} | Stability risk: {best.stability_risk:.2f}"
+            )
 
 
 def render_realtime_optimization_section():
