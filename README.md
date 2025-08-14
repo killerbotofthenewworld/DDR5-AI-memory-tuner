@@ -10,17 +10,22 @@
 
 ---
 
+Looking for docs? See the consolidated docs hub in `docs/` (index at `docs/README.md`).
+
 ## 📸 Screenshots & Features Demo
 
 ### 🎯 Main Interface - Professional Dashboard
+
 ![Main Dashboard](screenshots/Screenshot_20250623_155226.png)
 *Professional DDR5 optimization interface with simulation and AI optimization features*
 
 ### 🚀 Enhanced Features Hub - Advanced Tools  
+
 ![Enhanced Features](screenshots/Screenshot_20250623_155423.png)
 *Comprehensive feature hub with dark/light theme, 3D charts, real-time monitoring, and AI assistant*
 
 ### 🔧 Live Hardware Integration
+
 ![Live Tuning](screenshots/Screenshot_20250623_155517.png)
 *Real hardware control with safety locks, advanced integration, and comprehensive databases*
 
