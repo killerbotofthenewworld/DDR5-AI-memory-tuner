@@ -18,14 +18,22 @@ from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
 
 try:
-    from .ddr5_models import (DDR5Configuration, DDR5TimingParameters,
-                              DDR5VoltageParameters)
+    from .ddr5_models import (
+        DDR5Configuration,
+        DDR5TimingParameters,
+        DDR5VoltageParameters,
+    )
     from .ddr5_simulator import DDR5Simulator
     from .revolutionary_features import RevolutionaryDDR5Features
 except ImportError:
-    from src.ddr5_models import (DDR5Configuration, DDR5TimingParameters,
-                             DDR5VoltageParameters)
-    from src.ddr5_simulator import DDR5Simulator
+    # Non-package (tests) context: import top-level modules to maintain
+    # a single class identity
+    from ddr5_models import (
+        DDR5Configuration,
+        DDR5TimingParameters,
+        DDR5VoltageParameters,
+    )
+    from ddr5_simulator import DDR5Simulator
     from revolutionary_features import RevolutionaryDDR5Features
 
 warnings.filterwarnings('ignore')
@@ -98,43 +106,43 @@ class PerfectDDR5Optimizer:
         """Initialize comprehensive DDR5 performance database."""
         return {
             'ddr5_3200': [
-                {'cl': 14, 'trcd': 14, 'trp': 14, 'tras': 32, 'vddq': 1.08, 
+                {'cl': 14, 'trcd': 14, 'trp': 14, 'tras': 32, 'vddq': 1.08,
                  'performance': 88.5, 'stability': 98.0, 'power': 2200},
-                {'cl': 16, 'trcd': 16, 'trp': 16, 'tras': 36, 'vddq': 1.10, 
+                {'cl': 16, 'trcd': 16, 'trp': 16, 'tras': 36, 'vddq': 1.10,
                  'performance': 85.2, 'stability': 95.0, 'power': 2300},
-                {'cl': 18, 'trcd': 18, 'trp': 18, 'tras': 38, 'vddq': 1.10, 
+                {'cl': 18, 'trcd': 18, 'trp': 18, 'tras': 38, 'vddq': 1.10,
                  'performance': 82.1, 'stability': 98.0, 'power': 2250},
             ],
             'ddr5_4800': [
-                {'cl': 22, 'trcd': 22, 'trp': 22, 'tras': 48, 'vddq': 1.08, 
+                {'cl': 22, 'trcd': 22, 'trp': 22, 'tras': 48, 'vddq': 1.08,
                  'performance': 94.5, 'stability': 88.0, 'power': 2500},
-                {'cl': 24, 'trcd': 24, 'trp': 24, 'tras': 52, 'vddq': 1.10, 
+                {'cl': 24, 'trcd': 24, 'trp': 24, 'tras': 52, 'vddq': 1.10,
                  'performance': 92.3, 'stability': 90.0, 'power': 2550},
-                {'cl': 26, 'trcd': 26, 'trp': 26, 'tras': 54, 'vddq': 1.12, 
+                {'cl': 26, 'trcd': 26, 'trp': 26, 'tras': 54, 'vddq': 1.12,
                  'performance': 89.7, 'stability': 95.0, 'power': 2650},
             ],
             'ddr5_5600': [
-                {'cl': 28, 'trcd': 28, 'trp': 28, 'tras': 52, 'vddq': 1.10, 
+                {'cl': 28, 'trcd': 28, 'trp': 28, 'tras': 52, 'vddq': 1.10,
                  'performance': 96.8, 'stability': 85.0, 'power': 2600},
-                {'cl': 30, 'trcd': 30, 'trp': 30, 'tras': 56, 'vddq': 1.12, 
+                {'cl': 30, 'trcd': 30, 'trp': 30, 'tras': 56, 'vddq': 1.12,
                  'performance': 94.2, 'stability': 90.0, 'power': 2700},
-                {'cl': 32, 'trcd': 32, 'trp': 32, 'tras': 58, 'vddq': 1.14, 
+                {'cl': 32, 'trcd': 32, 'trp': 32, 'tras': 58, 'vddq': 1.14,
                  'performance': 91.6, 'stability': 94.0, 'power': 2800},
             ],
             'ddr5_6400': [
-                {'cl': 32, 'trcd': 32, 'trp': 32, 'tras': 58, 'vddq': 1.12, 
+                {'cl': 32, 'trcd': 32, 'trp': 32, 'tras': 58, 'vddq': 1.12,
                  'performance': 98.5, 'stability': 82.0, 'power': 2800},
-                {'cl': 34, 'trcd': 34, 'trp': 34, 'tras': 62, 'vddq': 1.15, 
+                {'cl': 34, 'trcd': 34, 'trp': 34, 'tras': 62, 'vddq': 1.15,
                  'performance': 96.1, 'stability': 87.0, 'power': 2900},
-                {'cl': 36, 'trcd': 36, 'trp': 36, 'tras': 64, 'vddq': 1.18, 
+                {'cl': 36, 'trcd': 36, 'trp': 36, 'tras': 64, 'vddq': 1.18,
                  'performance': 93.7, 'stability': 91.0, 'power': 3000},
             ],
             'ddr5_7200': [
-                {'cl': 36, 'trcd': 36, 'trp': 36, 'tras': 64, 'vddq': 1.15, 
+                {'cl': 36, 'trcd': 36, 'trp': 36, 'tras': 64, 'vddq': 1.15,
                  'performance': 99.2, 'stability': 78.0, 'power': 3000},
-                {'cl': 38, 'trcd': 38, 'trp': 38, 'tras': 68, 'vddq': 1.18, 
+                {'cl': 38, 'trcd': 38, 'trp': 38, 'tras': 68, 'vddq': 1.18,
                  'performance': 96.8, 'stability': 83.0, 'power': 3100},
-                {'cl': 40, 'trcd': 40, 'trp': 40, 'tras': 70, 'vddq': 1.20, 
+                {'cl': 40, 'trcd': 40, 'trp': 40, 'tras': 70, 'vddq': 1.20,
                  'performance': 94.4, 'stability': 88.0, 'power': 3200},
             ]
         }
@@ -148,7 +156,7 @@ class PerfectDDR5Optimizer:
         
         # Prepare features and targets
         feature_columns = [
-            'frequency', 'cl', 'trcd', 'trp', 'tras', 'trc', 'trfc', 
+            'frequency', 'cl', 'trcd', 'trp', 'tras', 'trc', 'trfc',
             'vddq', 'vpp'
         ]
         X = training_data[feature_columns].values

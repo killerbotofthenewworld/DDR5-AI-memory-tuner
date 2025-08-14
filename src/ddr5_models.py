@@ -3,7 +3,7 @@ DDR5 Memory Configuration and Parameter Models
 """
 
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Tuple
 from pydantic import BaseModel, Field, field_validator
 
 
@@ -40,10 +40,14 @@ class DDR5TimingParameters:
         violations = []
         
         if self.tras < (self.trcd + self.cl):
-            violations.append(f"tRAS ({self.tras}) must be >= tRCD + CL ({self.trcd + self.cl})")
+            violations.append(
+                f"tRAS ({self.tras}) must be >= tRCD + CL ({self.trcd + self.cl})"
+            )
         
         if self.trc < (self.tras + self.trp):
-            violations.append(f"tRC ({self.trc}) must be >= tRAS + tRP ({self.tras + self.trp})")
+            violations.append(
+                f"tRC ({self.trc}) must be >= tRAS + tRP ({self.tras + self.trp})"
+            )
         
         if self.tcwl < (self.cl - 1):
             violations.append(f"tCWL ({self.tcwl}) should be >= CL - 1 ({self.cl - 1})")
@@ -59,6 +63,13 @@ class DDR5VoltageParameters:
     vpp: float = 1.8   # Wordline boost voltage (V)
     vddq_tx: float = 1.1  # TX voltage (V)
     vddq_rx: float = 1.1  # RX voltage (V)
+    
+    @property
+    def vtt(self) -> float:
+        """Termination/reference voltage proxy for compatibility.
+        Approximate as half of VDDQ to satisfy feature extractors that expect VTT.
+        """
+        return round(self.vddq / 2.0, 3)
     
     def validate_ranges(self) -> List[str]:
         """Validate voltage ranges and return any violations."""
@@ -80,7 +91,7 @@ class PerformanceMetrics:
     memory_bandwidth: float = 0.0  # GB/s
     memory_latency: float = 0.0    # nanoseconds
     stability_score: float = 0.0   # 0-100 scale
-    power_consumption: float = 0.0 # watts
+    power_consumption: float = 0.0  # watts
     temperature: float = 0.0       # celsius
     signal_integrity: float = 0.0  # 0-100 scale
     thermal_throttling: bool = False
@@ -105,13 +116,19 @@ class DDR5Configuration(BaseModel):
     """Complete DDR5 memory configuration."""
     
     # Basic specifications
-    frequency: int = Field(default=5600, ge=3200, le=8400, description="Memory frequency in MT/s")
+    frequency: int = Field(
+        default=5600, ge=3200, le=8400, description="Memory frequency in MT/s"
+    )
     capacity: int = Field(default=16, description="Capacity per stick in GB")
-    rank_count: int = Field(default=1, ge=1, le=2, description="Number of ranks per DIMM")
+    rank_count: int = Field(
+        default=1, ge=1, le=2, description="Number of ranks per DIMM"
+    )
     channel_count: int = Field(default=2, description="Number of memory channels")
     
     # Additional attributes for compatibility
-    temperature: float = Field(default=65.0, description="Operating temperature in Celsius")
+    temperature: float = Field(
+        default=65.0, description="Operating temperature in Celsius"
+    )
     
     # Timing and voltage parameters
     timings: DDR5TimingParameters = Field(default_factory=DDR5TimingParameters)
@@ -124,6 +141,52 @@ class DDR5Configuration(BaseModel):
     def capacity_gb(self) -> int:
         """Get capacity in GB for compatibility."""
         return self.capacity
+
+    # --- Compatibility proxy properties mapping to performance_metrics ---
+    @property
+    def power_consumption(self) -> float:
+        """Total power consumption (watts), proxied from performance_metrics."""
+        return self.performance_metrics.power_consumption
+
+    @power_consumption.setter
+    def power_consumption(self, value: float) -> None:
+        self.performance_metrics.power_consumption = value
+
+    @property
+    def signal_integrity(self) -> float:
+        """Signal integrity score (0-100), proxied from performance_metrics."""
+        return self.performance_metrics.signal_integrity
+
+    @signal_integrity.setter
+    def signal_integrity(self, value: float) -> None:
+        self.performance_metrics.signal_integrity = value
+
+    @property
+    def thermal_throttling(self) -> bool:
+        """Thermal throttling flag, proxied from performance_metrics."""
+        return self.performance_metrics.thermal_throttling
+
+    @thermal_throttling.setter
+    def thermal_throttling(self, value: bool) -> None:
+        self.performance_metrics.thermal_throttling = value
+
+    @property
+    def ecc_enabled(self) -> bool:
+        """ECC enabled flag, proxied from performance_metrics for compatibility."""
+        return self.performance_metrics.ecc_enabled
+
+    @ecc_enabled.setter
+    def ecc_enabled(self, value: bool) -> None:
+        self.performance_metrics.ecc_enabled = value
+
+    @property
+    def xmp_enabled(self) -> bool:
+        """XMP enabled flag, proxied from performance_metrics for compatibility."""
+        return self.performance_metrics.xmp_enabled
+
+    @xmp_enabled.setter
+    def xmp_enabled(self, value: bool) -> None:
+        self.performance_metrics.xmp_enabled = value
     
     @field_validator('frequency')
     @classmethod
@@ -147,7 +210,9 @@ class DDR5Configuration(BaseModel):
         clock_period_ns = 2000 / self.frequency  # DDR uses double data rate
         self.performance_metrics.memory_latency = self.timings.cl * clock_period_ns
     
-    def validate_configuration(self, strict_jedec: bool = False) -> Dict[str, List[str]]:
+    def validate_configuration(
+        self, strict_jedec: bool = False
+    ) -> Dict[str, List[str]]:
         """Validate entire configuration and return violations by category."""
         violations = {
             'timing_violations': self.timings.validate_relationships(),
@@ -197,7 +262,9 @@ class DDR5Configuration(BaseModel):
 
         # Ensure stability_score is always set
         if total_violations > 0:
-            self.performance_metrics.stability_score = max(0, 50 - (total_violations * 10))
+            self.performance_metrics.stability_score = max(
+                0, 50 - (total_violations * 10)
+            )
         else:
             self.performance_metrics.stability_score = max(0, min(100, margin_score))
         
@@ -211,22 +278,57 @@ class DDR5Configuration(BaseModel):
             'jedec_voltage_violations': []
         }
         # JEDEC frequency validation
-        jedec_frequencies = [4000, 4400, 4800, 5200, 5600, 6000, 6400, 6800, 7200, 7600, 8000, 8400]
+        jedec_frequencies = [
+            4000,
+            4400,
+            4800,
+            5200,
+            5600,
+            6000,
+            6400,
+            6800,
+            7200,
+            7600,
+            8000,
+            8400,
+        ]
         if self.frequency not in jedec_frequencies:
             violations['jedec_frequency_violations'].append(
-                f"Frequency {self.frequency} MT/s is not JEDEC standard. Valid: {jedec_frequencies}")
+                (
+                    f"Frequency {self.frequency} MT/s is not JEDEC standard. "
+                    f"Valid: {jedec_frequencies}"
+                )
+            )
         # JEDEC timing validation (example: tCL, tRCD, tRP >= 13.75ns)
         cycle_time_ns = 2000 / self.frequency
         min_ns = 13.75
         if self.timings.cl * cycle_time_ns < min_ns:
             violations['jedec_timing_violations'].append(
-                f"tCL ({self.timings.cl * cycle_time_ns:.2f}ns) below JEDEC minimum ({min_ns}ns)")
+                (
+                    "tCL ("
+                    f"{self.timings.cl * cycle_time_ns:.2f}ns"
+                    ") below JEDEC minimum ("
+                    f"{min_ns}ns)"
+                )
+            )
         if self.timings.trcd * cycle_time_ns < min_ns:
             violations['jedec_timing_violations'].append(
-                f"tRCD ({self.timings.trcd * cycle_time_ns:.2f}ns) below JEDEC minimum ({min_ns}ns)")
+                (
+                    "tRCD ("
+                    f"{self.timings.trcd * cycle_time_ns:.2f}ns"
+                    ") below JEDEC minimum ("
+                    f"{min_ns}ns)"
+                )
+            )
         if self.timings.trp * cycle_time_ns < min_ns:
             violations['jedec_timing_violations'].append(
-                f"tRP ({self.timings.trp * cycle_time_ns:.2f}ns) below JEDEC minimum ({min_ns}ns)")
+                (
+                    "tRP ("
+                    f"{self.timings.trp * cycle_time_ns:.2f}ns"
+                    ") below JEDEC minimum ("
+                    f"{min_ns}ns)"
+                )
+            )
         # JEDEC voltage validation
         if not (1.0 <= self.voltages.vddq <= 1.2):
             violations['jedec_voltage_violations'].append(
@@ -256,7 +358,9 @@ class DDR5Configuration(BaseModel):
         return self.performance_metrics.stability_score
 
 
-def validate_ddr5_configuration(config: DDR5Configuration, strict_jedec: bool = False) -> Tuple[bool, Dict[str, List[str]]]:
+def validate_ddr5_configuration(
+    config: DDR5Configuration, strict_jedec: bool = False
+) -> Tuple[bool, Dict[str, List[str]]]:
     """
     Validate a DDR5 configuration and return validation results.
     

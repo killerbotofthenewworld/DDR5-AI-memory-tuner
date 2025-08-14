@@ -17,14 +17,14 @@ This section turns the roadmap into an actionable, time-bound plan. Dates assume
 - CI/CD and Quality Gates
     - [ ] Validate existing workflow at `.github/workflows/ci-cd.yml` and set required checks on PRs
     - [ ] Add local quality tooling: `.pre-commit-config.yaml`, `mypy.ini`, `.flake8` (align with CI)
-        - [ ] Introduce `requirements-dev.txt` (pytest, black, flake8, mypy, bandit, safety) and optional `constraints.txt`
-        - [ ] Enable coverage artifact upload and failing threshold in CI (soft-fail today → hard-fail >2 weeks)
+    - [ ] Introduce `requirements-dev.txt` (pytest, black, flake8, mypy, bandit, safety) and optional `constraints.txt`
+    - [ ] Enable coverage artifact upload and failing threshold in CI (soft-fail today → hard-fail >2 weeks)
 
 - Windows Installer (real, easy, robust)
     - [ ] Promote current per-user installer to a signed EXE via Inno Setup or NSIS (keeps venv layout)
-    - [ ] Bundle an offline wheels cache for heavy deps (torch, torchvision, opencv) to reduce install flakiness
-        - [ ] Add a “Repair” option and better logs; ensure Start Menu/Uninstall entries are present and reliable
-        - [ ] Document code signing workflow and publish checksum in Releases
+    - [ ] Bundle an offline wheels cache for heavy deps (torch, torchvision, opencv) to reduce install flakiness)
+    - [ ] Add a “Repair” option and better logs; ensure Start Menu/Uninstall entries are present and reliable
+    - [ ] Document code signing workflow and publish checksum in Releases
 
 Deliverables (end of Week 1):
 
@@ -34,18 +34,18 @@ Deliverables (end of Week 1):
 ### Week 2: Performance, Safety, and AI Quick Wins
 
 - Performance and Startup
-        - [ ] Profile cold start; lazy-import heavy modules; cache static datasets (e.g., databases under `src/`)
-        - [ ] Add a simple on-disk cache (joblib/pickle) for expensive computations; background warm-up task
+    - [ ] Profile cold start; lazy-import heavy modules; cache static datasets (e.g., databases under `src/`)
+    - [ ] Add a simple on-disk cache (joblib/pickle) for expensive computations; background warm-up task
 
 - Safety and Validation
-        - [ ] Extend JEDEC validation rules (clear messages; all primary timings covered)
-        - [ ] Make “Safe Mode” the default; add Dry-Run preflight for live changes; highlight violations in UI
+    - [ ] Extend JEDEC validation rules (clear messages; all primary timings covered)
+    - [ ] Make “Safe Mode” the default; add Dry-Run preflight for live changes; highlight violations in UI
 
 - AI Quick Wins (no API breaks)
     - [ ] Unify optimizer strategy behind a single interface (GA/RL/BO)
     - [ ] Add Pareto frontier view (bandwidth vs latency vs stability)
-        - [ ] Add basic SHAP/feature importance for the regression predictor
-        - [ ] Add uncertainty estimates and warm-start from known-good presets
+    - [ ] Add basic SHAP/feature importance for the regression predictor
+    - [ ] Add uncertainty estimates and warm-start from known-good presets
 
 Deliverables (end of Week 2):
 

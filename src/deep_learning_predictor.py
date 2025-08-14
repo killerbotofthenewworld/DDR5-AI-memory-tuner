@@ -5,27 +5,26 @@ This module implements advanced deep learning models for predicting
 DDR5 memory performance, stability, and optimization recommendations.
 """
 
-import torch
 import torch.nn as nn
-import torch.nn.functional as F
 import numpy as np
-from typing import Dict, List, Any, Union
+from typing import Dict, List, Any
 import logging
 from datetime import datetime
 from dataclasses import dataclass
-import pickle
 from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
 from sklearn.neural_network import MLPRegressor
 from sklearn.preprocessing import StandardScaler, RobustScaler
-from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.metrics import r2_score
 import joblib
 
 try:
     from src.ddr5_models import DDR5Configuration, PerformanceMetrics
     from src.ddr5_simulator import DDR5Simulator
 except ImportError:
-    from src.ddr5_models import DDR5Configuration, PerformanceMetrics
-    from src.ddr5_simulator import DDR5Simulator
+    # Non-package (tests) context: import top-level modules to keep a single
+    # class identity
+    from ddr5_models import DDR5Configuration, PerformanceMetrics
+    from ddr5_simulator import DDR5Simulator
 
 logger = logging.getLogger(__name__)
 
@@ -115,8 +114,12 @@ class EnsemblePredictor:
         self.models = {
             'neural_network': AdvancedPerformancePredictor(),
             'random_forest': RandomForestRegressor(n_estimators=200, random_state=42),
-            'gradient_boosting': GradientBoostingRegressor(n_estimators=200, random_state=42),
-            'mlp': MLPRegressor(hidden_layer_sizes=(256, 128, 64), max_iter=1000, random_state=42)
+            'gradient_boosting': GradientBoostingRegressor(
+                n_estimators=200, random_state=42
+            ),
+            'mlp': MLPRegressor(
+                hidden_layer_sizes=(256, 128, 64), max_iter=1000, random_state=42
+            )
         }
         
         self.scalers = {
@@ -157,17 +160,19 @@ class EnsemblePredictor:
             # Voltages
             config.voltages.vddq,
             config.voltages.vpp,
-            config.voltages.vtt,
+            # Use vtt proxy property (derived from vddq)
+            getattr(config.voltages, 'vtt', config.voltages.vddq / 2.0),
             
             # Environmental factors
             config.temperature,
-            config.power_consumption,
-            config.signal_integrity,
-            config.thermal_throttling,
+            # Compatibility properties proxied to performance_metrics in model
+            getattr(config, 'power_consumption', 0.0),
+            getattr(config, 'signal_integrity', 0.0),
+            float(getattr(config, 'thermal_throttling', False)),
             
             # Boolean features (converted to 0/1)
-            1.0 if config.ecc_enabled else 0.0,
-            1.0 if config.xmp_enabled else 0.0,
+            1.0 if getattr(config, 'ecc_enabled', False) else 0.0,
+            1.0 if getattr(config, 'xmp_enabled', False) else 0.0,
         ]
         
         # Store feature names for interpretation
@@ -177,13 +182,13 @@ class EnsemblePredictor:
                 'cl', 'trcd', 'trp', 'tras', 'trc', 'trfc',
                 'trrd_s', 'trrd_l', 'tfaw', 'twr', 'twtr_s', 'twtr_l', 'tccd_l',
                 'vddq', 'vpp', 'vtt',
-                'temperature', 'power_consumption', 'signal_integrity', 'thermal_throttling',
-                'ecc_enabled', 'xmp_enabled'
+                'temperature', 'power_consumption', 'signal_integrity',
+                'thermal_throttling', 'ecc_enabled', 'xmp_enabled'
             ]
         
         return np.array(features)
     
-    def train(self, configurations: List[DDR5Configuration], 
+    def train(self, configurations: List[DDR5Configuration],
               performance_metrics: List[PerformanceMetrics]) -> Dict[str, float]:
         """Train the ensemble predictor"""
         logger.info("Training ensemble predictor...")
@@ -192,9 +197,9 @@ class EnsemblePredictor:
         X = np.array([self.extract_features(config) for config in configurations])
         
         # Separate targets
-        y_bandwidth = np.array([metrics.memory_bandwidth for metrics in performance_metrics])
-        y_latency = np.array([metrics.memory_latency for metrics in performance_metrics])
-        y_stability = np.array([metrics.stability_score for metrics in performance_metrics])
+        y_bandwidth = np.array(
+            [metrics.memory_bandwidth for metrics in performance_metrics]
+        )
         
         # Scale features
         X_scaled_standard = self.scalers['standard'].fit_transform(X)
@@ -493,7 +498,7 @@ class StabilityPredictor:
         if config.temperature > 75:
             risk_factors.append("High Temperature")
         
-        if config.power_consumption > 15:
+        if getattr(config, 'power_consumption', 0.0) > 15:
             risk_factors.append("High Power Consumption")
         
         return risk_factors
