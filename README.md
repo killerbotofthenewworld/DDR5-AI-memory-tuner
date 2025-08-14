@@ -1,8 +1,8 @@
-# 🧠 DDR5 AI Sandbox Simulator v6.0.0
+# 🧠 DDR5 AI Memory Tuner v6.0.2
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.9+](https://img.shields.io/badge/Python-3.9+-blue.svg)](https://www.python.org/downloads/)
-[![Version](https://img.shields.io/badge/version-6.0.0-blue.svg)](https://github.com/killerbotofthenewworld/ddr5-ai-memory-tuner/releases)
+[![Version](https://img.shields.io/badge/version-6.0.2-blue.svg)](https://github.com/killerbotofthenewworld/ddr5-ai-memory-tuner/releases)
 [![CI](https://github.com/killerbotofthenewworld/ddr5-ai-memory-tuner/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/killerbotofthenewworld/ddr5-ai-memory-tuner/actions/workflows/ci-cd.yml)
 
 > DDR5 AI memory tuner for safe timing optimization and performance simulation; Streamlit UI, Windows installer, JEDEC compliance.
@@ -36,7 +36,9 @@ Looking for docs? See the consolidated docs hub in `docs/` (index at `docs/READM
 
 Option A — EXE installer (recommended):
 
-- Download the Windows installer from Releases: DDR5-AI-Memory-Tuner-Setup.exe
+- Download the Windows installer:
+	- Latest: <https://github.com/killerbotofthenewworld/ddr5-ai-memory-tuner/releases/latest/download/DDR5-AI-Memory-Tuner-Setup.exe>
+	- All versions: <https://github.com/killerbotofthenewworld/ddr5-ai-memory-tuner/releases>
 - Run the EXE (no admin required). It installs to `%LOCALAPPDATA%\DDR5-AI-Memory-Tuner`, sets up a venv, installs dependencies, and adds Start Menu/Desktop shortcuts.
 
 Option B — Scripted install (from source):
@@ -179,7 +181,7 @@ safety check
 
 | Metric | Value | Status |
 |--------|-------|--------|
-| **Version** | 6.0.0 | ✅ Current |
+| **Version** | 6.0.2 | ✅ Current |
 | **Tests** | 29/29 passing | ✅ All Green |
 | **Code Quality** | A+ Grade | ✅ Excellent |
 | **Security** | No Issues | ✅ Secure |
