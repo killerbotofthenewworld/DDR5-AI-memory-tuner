@@ -52,6 +52,12 @@ jobs:
       run: |
         mypy src/ || echo "⚠️ Type checking issues found - continuing pipeline"
       continue-on-error: true
+
+    - name: Run pre-commit (non-blocking)
+      run: |
+        pip install pre-commit
+        pre-commit run --all-files || echo "⚠️ Pre-commit hooks reported issues - continuing pipeline"
+      continue-on-error: true
     
     - name: Show pytest and plugin versions
       run: |
