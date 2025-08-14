@@ -1,43 +1,8 @@
-# 🚀 DDR5 AI Sandbox Simulator - Release v5.1
+# Release v5.1.0 (Moved)
 
-## 🔥 BREAKTHROUGH RELEASE: Real Hardware Integration with 15-Minute Safety Lock
+This release note has moved.
 
-**Release Date:** June 22, 2025  
-**Version:** 5.1.0 - Hardware Integration with Advanced Safety  
-**Type:** Major Feature Release with Critical Safety Enhancements
-
----
-
-## 🎯 Major New Features
-
-### 🔒 15-Minute Mandatory Safety Lock (NEW!)
-- **⏰ Preparation Period**: Mandatory 15-minute countdown before hardware access
-- **📚 Documentation Time**: Forces users to read safety warnings and prepare
-- **🛡️ Progressive Safety**: Multi-level confirmations after countdown completion
-- **📊 Real-time Progress**: Live countdown with preparation checklist
-- **🧠 Mental Preparation**: Time to understand risks and prepare for instability
-
-### 🖥️ Enhanced Real Hardware Integration
-- **⚡ Direct DDR5 Control**: Real-time parameter adjustment without BIOS reboots
-- **🔧 Individual Parameter Control**: Separate controls for CL, tRCD, tRP, VDDQ, VPP
-- **🚨 Emergency Systems**: Instant backup restoration and emergency stops
-- **📊 Session Management**: Professional tuning session tracking with metrics
-- **🔌 Platform Detection**: Automatic hardware capability assessment
-
-### 🛡️ Professional Safety Systems
-- **🔄 Automatic Backups**: Configuration backup before any hardware changes
-- **🌡️ Real-time Monitoring**: Temperature, voltage, stability tracking
-- **⚖️ Legal Disclaimers**: Professional-grade risk communication
-- **🎯 Safety Validation**: Continuous parameter compliance checking
-- **🚨 Multi-layer Protection**: Comprehensive hardware damage prevention
-
----
-
-## 🔧 Technical Improvements
-
-### Bug Fixes
-- ✅ **ValidationError Resolution**: Fixed field name mismatches in DDR5Configuration
-- ✅ **Pydantic Model Compatibility**: Corrected `.copy()` to `.model_copy()` for proper model handling
+See the centralized version here: [docs/releases/RELEASE_v5.1.0.md](docs/releases/RELEASE_v5.1.0.md)
 - ✅ **Parameter Mapping**: Fixed `primary_timings` to `timings` and `voltage` to `voltages`
 - ✅ **Import Errors**: Resolved hardware integration module import issues
 

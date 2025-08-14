@@ -6,7 +6,7 @@ Welcome to the DDR5 AI Sandbox Simulator docs. This hub consolidates guides and 
 - Windows: see windows/README-windows.md
 - Features overview: AI_FEATURES.md
 - Project status: STATUS.md
-- Releases: docs/releases/
+- Releases: see docs/releases/
 - Contribution guide: CONTRIBUTING.md
 
 Tip: The simulator runs on Streamlit at [http://localhost:8521](http://localhost:8521).
