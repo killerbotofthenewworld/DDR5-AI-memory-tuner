@@ -180,3 +180,6 @@ Thumbs.db
 *.tmp
 *.temp
 *~
+
+# Windows installer outputs
+windows/installer/*.exe

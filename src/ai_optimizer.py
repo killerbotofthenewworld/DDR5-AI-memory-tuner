@@ -51,6 +51,42 @@ class GeneticAlgorithmOptimizer:
         self.max_generations = max_generations
         self.simulator = DDR5Simulator()
         
+    @staticmethod
+    def _enforce_jedec_constraints(cfg: DDR5Configuration) -> DDR5Configuration:
+        """Repair config to satisfy common JEDEC-like timing relationships and safe bounds.
+
+        Rules applied conservatively:
+        - Frequency within 3200..8400 MT/s
+        - Voltages within nominal safe ranges (VDDQ 1.05..1.25, VPP 1.7..2.0)
+        - tRAS >= tRCD + tCL
+        - tRC  >= tRAS + tRP
+        - All timings >= 1
+        """
+        repaired = cfg.model_copy()
+
+        # Frequency
+        repaired.frequency = int(max(3200, min(8400, repaired.frequency)))
+
+        # Voltages
+        repaired.voltages.vddq = float(
+            max(1.05, min(1.25, round(repaired.voltages.vddq, 3)))
+        )
+        repaired.voltages.vpp = float(
+            max(1.7, min(2.0, round(repaired.voltages.vpp, 3)))
+        )
+
+        # Timings min bounds
+        t = repaired.timings
+        for name in ("cl", "trcd", "trp", "tras", "trc", "trfc"):
+            if hasattr(t, name):
+                setattr(t, name, max(1, int(getattr(t, name))))
+
+        # Derived constraints
+        t.tras = max(t.tras, t.trcd + t.cl)
+        t.trc = max(t.trc, t.tras + t.trp)
+
+        return repaired
+
     def create_random_config(self, base_config: DDR5Configuration) -> DDR5Configuration:
         """Create a random configuration based on a base configuration"""
         config = base_config.model_copy()
@@ -62,18 +98,22 @@ class GeneticAlgorithmOptimizer:
                 # Allow ±20% variation
                 min_val = max(1, int(current_value * 0.8))
                 max_val = int(current_value * 1.2)
-                setattr(config.timings, timing_name, random.randint(min_val, max_val))
-        
-        # Randomly adjust frequency within DDR5 range
-        config.frequency = random.randint(3200, 8400)
-        
-        # Randomly adjust voltages within safe range
-        config.voltages.vddq = round(random.uniform(1.05, 1.25), 3)
-        config.voltages.vpp = round(random.uniform(1.7, 2.0), 3)
-        
-        return config
+            setattr(config.timings, timing_name, random.randint(min_val, max_val))
+
+            # Randomly adjust frequency within DDR5 range
+            config.frequency = random.randint(3200, 8400)
+
+            # Randomly adjust voltages within safe range
+            config.voltages.vddq = round(random.uniform(1.05, 1.25), 3)
+            config.voltages.vpp = round(random.uniform(1.7, 2.0), 3)
+
+            return self._enforce_jedec_constraints(config)
     
-    def crossover(self, parent1: DDR5Configuration, parent2: DDR5Configuration) -> Tuple[DDR5Configuration, DDR5Configuration]:
+    def crossover(
+        self,
+        parent1: DDR5Configuration,
+        parent2: DDR5Configuration,
+    ) -> Tuple[DDR5Configuration, DDR5Configuration]:
         """Perform crossover between two parent configurations"""
         child1 = parent1.model_copy()
         child2 = parent2.model_copy()
@@ -92,11 +132,20 @@ class GeneticAlgorithmOptimizer:
         
         # Crossover voltages
         if random.random() < 0.5:
-            child1.voltages.vddq, child2.voltages.vddq = parent2.voltages.vddq, parent1.voltages.vddq
+            child1.voltages.vddq, child2.voltages.vddq = (
+                parent2.voltages.vddq,
+                parent1.voltages.vddq,
+            )
         if random.random() < 0.5:
-            child1.voltages.vpp, child2.voltages.vpp = parent2.voltages.vpp, parent1.voltages.vpp
-        
-        return child1, child2
+            child1.voltages.vpp, child2.voltages.vpp = (
+                parent2.voltages.vpp,
+                parent1.voltages.vpp,
+            )
+
+        return (
+            self._enforce_jedec_constraints(child1),
+            self._enforce_jedec_constraints(child2),
+        )
     
     def mutate(self, config: DDR5Configuration) -> DDR5Configuration:
         """Mutate a configuration"""
@@ -118,36 +167,55 @@ class GeneticAlgorithmOptimizer:
         
         # Mutate voltages
         if random.random() < self.mutation_rate:
-            mutated.voltages.vddq = max(1.05, min(1.25, mutated.voltages.vddq + random.uniform(-0.02, 0.02)))
+            mutated.voltages.vddq = max(
+                1.05,
+                min(1.25, mutated.voltages.vddq + random.uniform(-0.02, 0.02)),
+            )
         if random.random() < self.mutation_rate:
-            mutated.voltages.vpp = max(1.7, min(2.0, mutated.voltages.vpp + random.uniform(-0.05, 0.05)))
-        
-        return mutated
+            mutated.voltages.vpp = max(
+                1.7,
+                min(2.0, mutated.voltages.vpp + random.uniform(-0.05, 0.05)),
+            )
+
+        return self._enforce_jedec_constraints(mutated)
     
     def evaluate_fitness(self, config: DDR5Configuration) -> float:
         """Evaluate the fitness of a configuration"""
         try:
+            # Ensure constraints before evaluation
+            config = self._enforce_jedec_constraints(config)
             metrics = self.simulator.simulate_performance(config)
             
             # Composite fitness score
-            bandwidth_score = metrics.memory_bandwidth / 100000  # Normalize to ~0-1
-            latency_score = 1.0 / (metrics.memory_latency + 1)  # Lower latency is better
-            stability_score = metrics.stability_score
+            # Use dict-style access to avoid attribute typing issues
+            bandwidth_score = float(metrics["memory_bandwidth"]) / 100000.0
+            # Lower latency is better
+            latency_score = 1.0 / (float(metrics["memory_latency"]) + 1.0)
+            stability_score = float(metrics["stability_score"])
             
             # Weighted combination
-            fitness = (0.4 * bandwidth_score + 0.3 * latency_score + 0.3 * stability_score)
+            fitness = (
+                0.4 * bandwidth_score
+                + 0.3 * latency_score
+                + 0.3 * stability_score
+            )
             
             return max(0.0, fitness)
         except Exception as e:
             logger.warning(f"Error evaluating fitness: {e}")
             return 0.0
     
-    def optimize(self, base_config: DDR5Configuration, target_metric: str = "overall") -> OptimizationResult:
+    def optimize(
+        self, base_config: DDR5Configuration, target_metric: str = "overall"
+    ) -> OptimizationResult:
         """Run genetic algorithm optimization"""
         start_time = datetime.now()
         
         # Initialize population
-        population = [self.create_random_config(base_config) for _ in range(self.population_size)]
+        population = [
+            self.create_random_config(base_config)
+            for _ in range(self.population_size)
+        ]
         history = []
         
         best_config = None
@@ -174,7 +242,12 @@ class GeneticAlgorithmOptimizer:
             }
             history.append(gen_stats)
             
-            logger.info(f"Generation {generation}: Best={best_fitness:.4f}, Avg={gen_stats['avg_fitness']:.4f}")
+            logger.info(
+                "Generation %d: Best=%.4f, Avg=%.4f",
+                generation,
+                best_fitness,
+                gen_stats["avg_fitness"],
+            )
             
             # Check convergence
             if len(history) >= 10:
@@ -188,7 +261,11 @@ class GeneticAlgorithmOptimizer:
             
             # Elitism - keep best individuals
             elite_count = int(self.population_size * self.elitism_ratio)
-            elite_indices = sorted(range(len(fitness_scores)), key=lambda i: fitness_scores[i], reverse=True)[:elite_count]
+            elite_indices = sorted(
+                range(len(fitness_scores)),
+                key=lambda i: fitness_scores[i],
+                reverse=True,
+            )[:elite_count]
             for i in elite_indices:
                 new_population.append(population[i].model_copy())
             
@@ -215,8 +292,10 @@ class GeneticAlgorithmOptimizer:
         
         execution_time = (datetime.now() - start_time).total_seconds()
         
+        # Fallback to base_config if best_config somehow stayed None
+        final_best = best_config or base_config
         return OptimizationResult(
-            best_config=best_config,
+            best_config=final_best,
             best_score=best_fitness,
             optimization_history=history,
             generation_count=len(history),
@@ -224,20 +303,29 @@ class GeneticAlgorithmOptimizer:
             execution_time=execution_time
         )
     
-    def _tournament_selection(self, population: List[DDR5Configuration], fitness_scores: List[float], tournament_size: int = 3) -> DDR5Configuration:
+    def _tournament_selection(
+        self,
+        population: List[DDR5Configuration],
+        fitness_scores: List[float],
+        tournament_size: int = 3,
+    ) -> DDR5Configuration:
         """Tournament selection for genetic algorithm"""
-        tournament_indices = random.sample(range(len(population)), min(tournament_size, len(population)))
+        tournament_indices = random.sample(
+            range(len(population)), min(tournament_size, len(population))
+        )
         best_index = max(tournament_indices, key=lambda i: fitness_scores[i])
         return population[best_index]
 
 class ReinforcementLearningOptimizer:
     """Q-Learning based optimizer for DDR5 parameters"""
     
-    def __init__(self, 
-                 learning_rate: float = 0.1,
-                 discount_factor: float = 0.95,
-                 epsilon: float = 0.1,
-                 epsilon_decay: float = 0.995):
+    def __init__(
+        self,
+        learning_rate: float = 0.1,
+        discount_factor: float = 0.95,
+        epsilon: float = 0.1,
+        epsilon_decay: float = 0.995,
+    ) -> None:
         self.learning_rate = learning_rate
         self.discount_factor = discount_factor
         self.epsilon = epsilon
@@ -247,7 +335,12 @@ class ReinforcementLearningOptimizer:
     
     def state_to_key(self, config: DDR5Configuration) -> str:
         """Convert configuration to state key"""
-        return f"{config.frequency}_{config.timings.cl}_{config.timings.trcd}_{config.voltages.vddq:.2f}"
+        return (
+            f"{config.frequency}_"
+            f"{config.timings.cl}_"
+            f"{config.timings.trcd}_"
+            f"{config.voltages.vddq:.2f}"
+        )
     
     def get_actions(self, config: DDR5Configuration) -> List[str]:
         """Get possible actions from current state"""
@@ -291,7 +384,9 @@ class ReinforcementLearningOptimizer:
         
         return new_config
     
-    def optimize(self, base_config: DDR5Configuration, episodes: int = 1000) -> OptimizationResult:
+    def optimize(
+        self, base_config: DDR5Configuration, episodes: int = 1000
+    ) -> OptimizationResult:
         """Run reinforcement learning optimization"""
         start_time = datetime.now()
         history = []
@@ -332,7 +427,9 @@ class ReinforcementLearningOptimizer:
                 max_future_q = 0.0
             
             current_q = self.q_table[state_key][action]
-            new_q = current_q + self.learning_rate * (reward + self.discount_factor * max_future_q - current_q)
+            new_q = current_q + self.learning_rate * (
+                reward + self.discount_factor * max_future_q - current_q
+            )
             self.q_table[state_key][action] = new_q
             
             # Update best configuration
@@ -356,7 +453,13 @@ class ReinforcementLearningOptimizer:
             self.epsilon *= self.epsilon_decay
             
             if episode % 100 == 0:
-                logger.info(f"Episode {episode}: Reward={reward:.4f}, Best={best_score:.4f}, Epsilon={self.epsilon:.4f}")
+                logger.info(
+                    "Episode %d: Reward=%.4f, Best=%.4f, Epsilon=%.4f",
+                    episode,
+                    reward,
+                    best_score,
+                    self.epsilon,
+                )
         
         execution_time = (datetime.now() - start_time).total_seconds()
         
@@ -374,20 +477,27 @@ class ReinforcementLearningOptimizer:
         try:
             metrics = self.simulator.simulate_performance(config)
             # Composite reward based on performance metrics
-            return (metrics.memory_bandwidth / 100000 + 
-                   1.0 / (metrics.memory_latency + 1) + 
-                   metrics.stability_score) / 3.0
+            return (
+                float(metrics["memory_bandwidth"]) / 100000.0
+                + 1.0 / (float(metrics["memory_latency"]) + 1.0)
+                + float(metrics["stability_score"])
+            ) / 3.0
         except Exception:
             return 0.0
+
 
 class EnsembleOptimizer:
     """Ensemble optimizer combining multiple optimization strategies"""
     
     def __init__(self):
-        self.ga_optimizer = GeneticAlgorithmOptimizer(population_size=30, max_generations=50)
+        self.ga_optimizer = GeneticAlgorithmOptimizer(
+            population_size=30, max_generations=50
+        )
         self.rl_optimizer = ReinforcementLearningOptimizer(epsilon=0.2)
         
-    def optimize(self, base_config: DDR5Configuration, method: str = "ensemble") -> OptimizationResult:
+    def optimize(
+        self, base_config: DDR5Configuration, method: str = "ensemble"
+    ) -> OptimizationResult:
         """Run ensemble optimization"""
         start_time = datetime.now()
         
@@ -403,15 +513,20 @@ class EnsembleOptimizer:
             # Select best result
             if ga_result.best_score > rl_result.best_score:
                 best_result = ga_result
-                best_method = "genetic"
             else:
                 best_result = rl_result
-                best_method = "reinforcement"
             
             # Combine history
             combined_history = []
-            combined_history.extend([{**h, 'method': 'genetic'} for h in ga_result.optimization_history])
-            combined_history.extend([{**h, 'method': 'reinforcement'} for h in rl_result.optimization_history])
+            combined_history.extend(
+                [{**h, 'method': 'genetic'} for h in ga_result.optimization_history]
+            )
+            combined_history.extend(
+                [
+                    {**h, 'method': 'reinforcement'}
+                    for h in rl_result.optimization_history
+                ]
+            )
             
             execution_time = (datetime.now() - start_time).total_seconds()
             
@@ -426,6 +541,7 @@ class EnsembleOptimizer:
         else:
             raise ValueError(f"Unknown optimization method: {method}")
 
+
 class AIOptimizer:
     """Main AI Optimizer class that orchestrates different optimization strategies"""
     
@@ -433,11 +549,13 @@ class AIOptimizer:
         self.ensemble_optimizer = EnsembleOptimizer()
         self.optimization_history = []
         
-    def optimize_configuration(self, 
-                             base_config: DDR5Configuration,
-                             optimization_goal: str = "performance",
-                             method: str = "ensemble",
-                             constraints: Optional[Dict[str, Any]] = None) -> OptimizationResult:
+    def optimize_configuration(
+        self,
+        base_config: DDR5Configuration,
+        optimization_goal: str = "performance",
+        method: str = "ensemble",
+        constraints: Optional[Dict[str, Any]] = None,
+    ) -> OptimizationResult:
         """
         Optimize DDR5 configuration using AI algorithms
         
@@ -447,7 +565,11 @@ class AIOptimizer:
             method: "genetic", "reinforcement", or "ensemble"
             constraints: Optional constraints dict
         """
-        logger.info(f"Starting AI optimization with method: {method}, goal: {optimization_goal}")
+        logger.info(
+            "Starting AI optimization with method: %s, goal: %s",
+            method,
+            optimization_goal,
+        )
         
         # Apply constraints to base configuration if provided
         if constraints:
@@ -476,15 +598,21 @@ class AIOptimizer:
         
         return result
     
-    def _apply_constraints(self, config: DDR5Configuration, constraints: Dict[str, Any]) -> DDR5Configuration:
+    def _apply_constraints(
+        self, config: DDR5Configuration, constraints: Dict[str, Any]
+    ) -> DDR5Configuration:
         """Apply constraints to configuration"""
         constrained_config = config.model_copy()
         
         if 'max_frequency' in constraints:
-            constrained_config.frequency = min(constrained_config.frequency, constraints['max_frequency'])
+            constrained_config.frequency = min(
+                constrained_config.frequency, constraints['max_frequency']
+            )
         
         if 'max_voltage' in constraints:
-            constrained_config.voltages.vddq = min(constrained_config.voltages.vddq, constraints['max_voltage'])
+            constrained_config.voltages.vddq = min(
+                constrained_config.voltages.vddq, constraints['max_voltage']
+            )
         
         if 'min_stability' in constraints:
             # This would require integration with stability prediction
@@ -505,7 +633,9 @@ class AIOptimizer:
             self.ensemble_optimizer.ga_optimizer.mutation_rate = 0.1
         # "balanced" uses default settings
     
-    def get_optimization_suggestions(self, current_config: DDR5Configuration) -> List[Dict[str, Any]]:
+    def get_optimization_suggestions(
+        self, current_config: DDR5Configuration
+    ) -> List[Dict[str, Any]]:
         """Get AI-powered suggestions for configuration improvements"""
         suggestions = []
         
@@ -514,8 +644,14 @@ class AIOptimizer:
         current_metrics = simulator.simulate_performance(current_config)
         
         # Generate suggestions based on AI analysis
-        bandwidth = current_metrics.get('memory_bandwidth', 0) if isinstance(current_metrics, dict) else current_metrics.memory_bandwidth
-        latency = current_metrics.get('memory_latency', 0) if isinstance(current_metrics, dict) else current_metrics.memory_latency
+        if isinstance(current_metrics, dict):
+            bandwidth = current_metrics.get('memory_bandwidth', 0)
+            latency = current_metrics.get('memory_latency', 0)
+            stability = current_metrics.get('stability_score', 0)
+        else:
+            bandwidth = current_metrics.memory_bandwidth
+            latency = current_metrics.memory_latency
+            stability = current_metrics.stability_score
         
         if bandwidth < 80000:  # Low bandwidth
             suggestions.append({
@@ -533,7 +669,6 @@ class AIOptimizer:
                 'expected_improvement': '5-10% latency reduction'
             })
         
-        stability = current_metrics.get('stability_score', 0) if isinstance(current_metrics, dict) else current_metrics.stability_score
         if stability < 0.8:  # Low stability
             suggestions.append({
                 'type': 'voltage',

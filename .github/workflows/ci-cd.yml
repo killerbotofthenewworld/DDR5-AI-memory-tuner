@@ -171,6 +171,35 @@ jobs:
           TORCHVISION_VERSION=0.18.1
           TORCHAUDIO_VERSION=2.3.1
 
+  windows_installer:
+    needs: [test, security]
+    runs-on: windows-latest
+    if: github.event_name == 'release'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install Inno Setup
+        uses: crazy-max/ghaction-chocolatey@v3
+        with:
+          args: install innosetup --no-progress --yes
+      - name: Build Windows installer
+        shell: pwsh
+        run: |
+          .\windows\installer\build-installer.ps1
+      - name: Upload installer artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-installer
+          path: windows/installer/DDR5-AI-Memory-Tuner-Setup.exe
+      - name: Attach to Release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: windows/installer/DDR5-AI-Memory-Tuner-Setup.exe
+
   documentation:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
