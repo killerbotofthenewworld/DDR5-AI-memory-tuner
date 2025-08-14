@@ -8,7 +8,46 @@ This document outlines the comprehensive improvement plan for the DDR5 AI Memory
 
 This document outlines the comprehensive improvement plan for the DDR5 AI Sandbox Simulator, focusing on enhancing AI capabilities, testing, documentation, and user experience.
 
-## 🛠️ 2025 Q3 Upgrade Execution Plan (Next 2 Weeks)
+## 🔜 Next Improvements (Next 7 Days)
+
+Short, high-impact tasks to execute immediately. Non-breaking and testable.
+
+1. Quality + Tooling
+
+- [ ] Pre-commit hooks (black, flake8, isort). Acceptance: `pre-commit run -a` passes locally.
+- [ ] Mypy on `src/` core modules. Acceptance: `mypy src` passes with no new ignores.
+- [ ] Coverage gate 80% in CI. Acceptance: CI fails under 80%, uploads HTML report.
+
+1. Windows Installer polish
+
+- [ ] Add offline wheels cache for heavy deps (torch) and a Repair option. Acceptance: fresh VM install completes offline; Repair executes without errors.
+- [ ] Code signing integration doc + checksum in Releases. Acceptance: release assets include `.sha256` and signing notes.
+
+1. Performance quick wins
+
+- [ ] Lazy-import heavy modules (torch/plotly) in Streamlit tabs. Acceptance: cold start reduced by >20% on Windows.
+- [ ] On-disk cache for expensive predictions (joblib). Acceptance: warmed start shows >50% faster model inference.
+
+1. Safety defaults
+
+- [ ] Safe Mode default + Dry-Run preflight required for live tuning. Acceptance: UI blocks live actions until preflight passes.
+- [ ] Extend JEDEC validations and clearer messages. Acceptance: tests cover CL/tRCD/tRP/tRAS/tRC/tRFC relations.
+
+1. AI quick wins
+
+- [ ] Pareto view (bandwidth vs latency vs stability). Acceptance: chart renders with sample data; toggle in AI tab.
+- [ ] SHAP/feature importance for regression predictor (fast path). Acceptance: optional toggle; renders bar plot.
+
+1. Docs
+
+- [ ] Quick Start (Windows installer-focused) in README. Acceptance: steps tested on clean Windows user account.
+- [ ] docs/TESTING.md updated with property tests and safety checks. Acceptance: includes copy-paste commands and expected outputs.
+
+Notes
+
+- No breaking API changes. All items validated by unit tests or a small manual smoke run.
+
+## �🛠️ 2025 Q3 Upgrade Execution Plan (Next 2 Weeks)
 
 This section turns the roadmap into an actionable, time-bound plan. Dates assume start week of Aug 11, 2025. Adjust as needed.
 
@@ -161,5 +200,5 @@ Technical: coverage >90%, <2s optimization, >95% stability prediction, <1% hardw
 UX: fewer clicks, strong tutorials, better errors, improved discovery
 
 ---
-
-Last Updated: August 12, 2025 • Status: Active Development
+ 
+Last Updated: August 14, 2025 • Status: Active Development

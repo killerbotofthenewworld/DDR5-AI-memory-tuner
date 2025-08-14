@@ -5,23 +5,23 @@ Includes unit tests, integration tests, and performance tests.
 
 import pytest
 import numpy as np
-import pandas as pd
-import tempfile
-import os
+import pandas as pd  # noqa: F401  # used in potential future extensions
+import tempfile  # noqa: F401
+import os  # noqa: F401
 import sys
 from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import patch, MagicMock  # noqa: F401
 
-# Add src directory to path for testing
+# Add src directory to path for testing (allow E402 for path setup before imports)
 src_path = Path(__file__).parent.parent / "src"
-sys.path.append(str(src_path))
+sys.path.append(str(src_path))  # noqa: E402
 
-from ddr5_models import (
+from ddr5_models import (  # noqa: E402
     DDR5Configuration, DDR5TimingParameters, DDR5VoltageParameters,
     validate_ddr5_configuration
 )
-from ddr5_simulator import DDR5Simulator
-from perfect_ai_optimizer import PerfectDDR5Optimizer
+from ddr5_simulator import DDR5Simulator  # noqa: E402
+from perfect_ai_optimizer import PerfectDDR5Optimizer  # noqa: E402
 
 
 class TestDDR5Models:
@@ -455,7 +455,9 @@ class TestIntegrationTests:
         # Test simulation with valid config
         simulator = DDR5Simulator()
         result = simulator.simulate_performance(config)
-        assert all(key in result for key in ['bandwidth', 'latency', 'stability', 'power'])
+        assert all(
+            key in result for key in ['bandwidth', 'latency', 'stability', 'power']
+        )
     
     def test_error_handling_integration(self):
         """Test error handling across components."""

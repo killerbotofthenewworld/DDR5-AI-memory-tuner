@@ -4,15 +4,15 @@ Test suite for advanced AI optimization modules
 
 import pytest
 import numpy as np
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 import tempfile
 import os
 
 from src.ai_optimizer import (
-    AIOptimizer, 
-    GeneticAlgorithmOptimizer, 
+    AIOptimizer,
+    GeneticAlgorithmOptimizer,
     ReinforcementLearningOptimizer,
-    EnsembleOptimizer
+    EnsembleOptimizer,
 )
 from src.ultra_ai_optimizer import UltraAIOptimizer, ComputerVisionAnalyzer
 from src.deep_learning_predictor import (
@@ -94,8 +94,10 @@ class TestGeneticAlgorithmOptimizer:
         assert random_config is not None
         assert isinstance(random_config, DDR5Configuration)
         # Should be different from base config
-        assert (random_config.frequency != self.test_config.frequency or 
-                random_config.timings.cl != self.test_config.timings.cl)
+        assert (
+            random_config.frequency != self.test_config.frequency
+            or random_config.timings.cl != self.test_config.timings.cl
+        )
     
     def test_crossover_operation(self):
         """Test genetic crossover"""
@@ -180,7 +182,9 @@ class TestEnsembleOptimizer:
     def test_genetic_optimization(self):
         """Test genetic optimization method"""
         try:
-            result = self.ensemble_optimizer.optimize(self.test_config, method="genetic")
+            result = self.ensemble_optimizer.optimize(
+                self.test_config, method="genetic"
+            )
             
             assert result is not None
             assert hasattr(result, 'best_config')
@@ -192,7 +196,9 @@ class TestEnsembleOptimizer:
     def test_reinforcement_optimization(self):
         """Test reinforcement learning optimization method"""
         try:
-            result = self.ensemble_optimizer.optimize(self.test_config, method="reinforcement")
+            result = self.ensemble_optimizer.optimize(
+                self.test_config, method="reinforcement"
+            )
             
             assert result is not None
             assert hasattr(result, 'best_config')
@@ -226,13 +232,17 @@ class TestUltraAIOptimizer:
         assert tensor.shape[0] > 0  # Should have some features
         
         # Test reverse conversion
-        reconstructed_config = self.ultra_optimizer.tensor_to_config(tensor, self.test_config)
+        reconstructed_config = self.ultra_optimizer.tensor_to_config(
+            tensor, self.test_config
+        )
         assert isinstance(reconstructed_config, DDR5Configuration)
     
     def test_ai_recommendations(self):
         """Test AI recommendations"""
         try:
-            recommendations = self.ultra_optimizer.get_ai_recommendations(self.test_config)
+            recommendations = self.ultra_optimizer.get_ai_recommendations(
+                self.test_config
+            )
             
             assert isinstance(recommendations, list)
             # May be empty if models aren't trained
@@ -250,7 +260,9 @@ class TestUltraAIOptimizer:
         mock_ocr.return_value = "Memory Frequency: 3200 MHz\nCAS Latency: 16"
         
         try:
-            result = self.ultra_optimizer.analyze_bios_screenshot(np.zeros((100, 100, 3)))
+            result = self.ultra_optimizer.analyze_bios_screenshot(
+                np.zeros((100, 100, 3))
+            )
             
             assert isinstance(result, dict)
             assert 'detected_settings' in result or 'error' in result
@@ -276,7 +288,9 @@ class TestComputerVisionAnalyzer:
     def test_settings_parsing(self, mock_ocr, mock_decode):
         """Test memory settings parsing"""
         mock_decode.return_value = np.zeros((100, 100, 3), dtype=np.uint8)
-        mock_ocr.return_value = "Memory Frequency: 3200 MHz\nCAS Latency: 16\nVoltage: 1.2V"
+        mock_ocr.return_value = (
+            "Memory Frequency: 3200 MHz\nCAS Latency: 16\nVoltage: 1.2V"
+        )
         
         try:
             result = self.cv_analyzer.analyze_bios_screenshot(b"fake_image_data")
@@ -365,7 +379,9 @@ class TestStabilityPredictor:
     
     def test_heuristic_stability_prediction(self):
         """Test heuristic stability prediction"""
-        prediction = self.stability_predictor._heuristic_stability_prediction(self.test_config)
+        prediction = self.stability_predictor._heuristic_stability_prediction(
+            self.test_config
+        )
         
         assert isinstance(prediction, dict)
         assert 'stability_score' in prediction

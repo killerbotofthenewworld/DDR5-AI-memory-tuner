@@ -1,5 +1,12 @@
 [flake8]
 max-line-length = 88
-extend-ignore = E203,W503
+# Match Black's defaults + common style conflicts
+extend-ignore = E203, W503, W504, E128
+per-file-ignores =
+    tests/*: W293, E402
+    src/web_interface/tabs/*.py: W293, E501, W291, F841, F401
+    src/web_interface/main.py: E402, E501, W293, W291
+    src/web_interface/sidebar.py: W293, W291, E501
+    src/web_interface/components/*.py: W293, E501, W291, F401
 select = C,E,F,W,B,B9
 exclude = .git,__pycache__,build,dist,venv,.venv

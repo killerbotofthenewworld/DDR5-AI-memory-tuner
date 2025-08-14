@@ -7,6 +7,7 @@ source = src
 include =
     src/ai_optimizer.py
     src/ddr5_simulator.py
+    src/ddr5_models.py
 
 fail_under = 80
 show_missing = True

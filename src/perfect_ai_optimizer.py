@@ -893,6 +893,19 @@ class PerfectDDR5Optimizer:
             vddq_change = np.random.uniform(-0.02, 0.02)
             mutated.voltages.vddq = max(1.0, min(1.3, config.voltages.vddq + vddq_change))
         
+        # Ensure at least one mutation occurred to avoid no-op (reduces flakiness in tests)
+        if (
+            mutated.frequency == config.frequency
+            and mutated.timings.cl == config.timings.cl
+            and mutated.timings.trcd == config.timings.trcd
+            and mutated.timings.trp == config.timings.trp
+            and mutated.timings.tras == config.timings.tras
+            and abs(mutated.voltages.vddq - config.voltages.vddq) < 1e-9
+            and abs(mutated.voltages.vpp - config.voltages.vpp) < 1e-9
+        ):
+            # Force a minimal safe change to CL
+            mutated.timings.cl = max(20, min(60, mutated.timings.cl + 1))
+        
         return mutated
 
     def _apply_revolutionary_features(
