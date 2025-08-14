@@ -30,8 +30,15 @@
 
 ### Easy install (Windows)
 
+Option A — EXE installer (recommended):
+
+- Download the Windows installer from Releases: DDR5-AI-Sandbox-Simulator-Setup.exe
+- Run the EXE (no admin required). It installs to `%LOCALAPPDATA%\DDR5-AI-Sandbox-Simulator`, sets up a venv, installs dependencies, and adds Start Menu/Desktop shortcuts.
+
+Option B — Scripted install (from source):
+
 - Double-click `windows/install.bat` (or right-click `windows/install.ps1` → Run with PowerShell)
-- Creates a per-user install under `%LOCALAPPDATA%`, sets up a venv, installs deps, and adds Start Menu/Desktop shortcuts
+- Creates the same per-user install/shortcuts as the EXE
 - More details in `windows/README-windows.md`
 
 Launch options on Windows:

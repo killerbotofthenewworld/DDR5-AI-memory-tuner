@@ -89,6 +89,20 @@ if ($rcExit -ge 8) {
 Write-Ok "Files copied"
 
 # 3) Create venv and install deps
+$devCleanup = @('.venv','tests','test_models','screenshots','ddr5-simulator-installer','windows\\installer')
+foreach ($dc in $devCleanup) {
+    $p = Join-Path $InstallDir $dc
+    if (Test-Path $p) {
+        Write-Warn "Removing development artifact: ${dc}"
+        try {
+            Remove-Item -Recurse -Force -LiteralPath $p -ErrorAction Stop
+        } catch {
+            $errMsg = "Could not remove ${dc}: " + $_.Exception.Message
+            Write-Warn $errMsg
+        }
+    }
+}
+
 $VenvDir = Join-Path $InstallDir 'venv'
 if ((Test-Path $VenvDir) -and $Force) {
     Write-Warn "Removing existing venv (Force)"; Remove-Item -Recurse -Force $VenvDir
