@@ -1,11 +1,12 @@
 # Documentation Hub
 
-Welcome to the DDR5 AI Sandbox Simulator docs. This hub consolidates guides and release notes.
+Welcome to the DDR5 AI Memory Tuner docs. This hub consolidates guides and release notes.
 
 - Getting Started: see SETUP.md
 - Windows: see windows/README-windows.md
-- Features overview: AI_FEATURES.md
-- Project status: STATUS.md
+- Features overview: legacy/AI_FEATURES.md
+- Project status: legacy/STATUS.md
+- Roadmap: ROADMAP.md
 - Releases: see docs/releases/
 - Contribution guide: CONTRIBUTING.md
 

@@ -8,3 +8,4 @@
 - [Releases](./releases/)
 - [Changelog](../CHANGELOG.md)
 - [Contributing](../CONTRIBUTING.md)
+- [Roadmap](docs/ROADMAP.md)
