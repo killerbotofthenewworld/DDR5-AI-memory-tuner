@@ -6,7 +6,7 @@ Steps:
 
 1. Install Inno Setup 6
 2. Open the `.iss` file and build the installer
-3. Run the generated EXE; it will place files in `%LOCALAPPDATA%\DDR5-AI-Sandbox-Simulator` and call `windows/install.ps1`
+3. Run the generated EXE; it will place files in `%LOCALAPPDATA%\DDR5-AI-Memory-Tuner` and call `windows/install.ps1`
 
 Notes:
 

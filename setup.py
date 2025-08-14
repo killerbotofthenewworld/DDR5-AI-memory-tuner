@@ -13,8 +13,12 @@ long_description = (this_directory / "README.md").read_text()
 # Read requirements
 requirements = []
 try:
-    with open("requirements.txt", "r") as f:
-        requirements = [line.strip() for line in f if line.strip() and not line.startswith("#")]
+    with open("requirements.txt", "r", encoding="utf-8") as f:
+        requirements = [
+            line.strip()
+            for line in f
+            if line.strip() and not line.startswith("#")
+        ]
 except FileNotFoundError:
     requirements = [
         "streamlit>=1.28.0",
@@ -30,10 +34,13 @@ setup(
     version="6.0.0",
     author="DDR5 AI Sandbox Simulator Team",
     author_email="",
-    description="Professional AI-Powered DDR5 Memory Tuning Platform with Real-Time Hardware Integration & Enhanced Features",
+    description=(
+        "Professional AI-Powered DDR5 Memory Tuning Platform with Real-Time "
+        "Hardware Integration & Enhanced Features"
+    ),
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/killerbotofthenewworld/ddr5-ai-sandbox-simulator",
+    url="https://github.com/killerbotofthenewworld/ddr5-ai-memory-tuner",
     packages=find_packages(),
     classifiers=[
         "Development Status :: 5 - Production/Stable",
@@ -63,11 +70,20 @@ setup(
     package_data={
         "": ["*.md", "*.txt", "*.yml", "*.yaml"],
     },
-    keywords="ddr5 memory tuning ai optimization simulator hardware real-time websocket 3d-charts llm damage-prevention automl predictive-maintenance",
+    keywords=(
+        "ddr5 memory tuning ai optimization simulator hardware real-time "
+        "websocket 3d-charts llm damage-prevention automl predictive-maintenance"
+    ),
     project_urls={
-        "Bug Reports": "https://github.com/killerbotofthenewworld/ddr5-ai-sandbox-simulator/issues",
-        "Source": "https://github.com/killerbotofthenewworld/ddr5-ai-sandbox-simulator",
-        "Documentation": "https://github.com/killerbotofthenewworld/ddr5-ai-sandbox-simulator#readme",
+        "Bug Reports": (
+            "https://github.com/killerbotofthenewworld/ddr5-ai-memory-tuner/issues"
+        ),
+        "Source": (
+            "https://github.com/killerbotofthenewworld/ddr5-ai-memory-tuner"
+        ),
+        "Documentation": (
+            "https://github.com/killerbotofthenewworld/ddr5-ai-memory-tuner#readme"
+        ),
         "Ko-fi": "https://ko-fi.com/killerbotofthenewworld",
     },
 )

@@ -104,8 +104,8 @@ We welcome feature requests! Please:
 1. **Setup Development Environment**
 
    ```bash
-   git clone https://github.com/killerbotofthenewworld/ddr5-ai-sandbox-simulator.git
-   cd ddr5-ai-sandbox-simulator
+   git clone https://github.com/killerbotofthenewworld/ddr5-ai-memory-tuner.git
+   cd ddr5-ai-memory-tuner
    python -m venv venv
    source venv/bin/activate  # or venv\Scripts\activate on Windows
    pip install -r requirements-dev.txt -r requirements.txt

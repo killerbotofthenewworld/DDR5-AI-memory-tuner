@@ -59,8 +59,8 @@ Type: Major Feature Release with Critical Safety Enhancements
 ### New Users
 
 ```bash
-git clone https://github.com/killerbotofthenewworld/ddr5-ai-sandbox-simulator.git
-cd ddr5-ai-sandbox-simulator
+git clone https://github.com/killerbotofthenewworld/ddr5-ai-memory-tuner.git
+cd ddr5-ai-memory-tuner
 pip install -r requirements.txt
 python -m streamlit run src/web_interface/main.py --server.port 8521
 ```

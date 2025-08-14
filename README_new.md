@@ -14,8 +14,8 @@ Advanced memory tuning with artificial intelligence, real hardware integration, 
 ## 🚀 Quick Start
 
 ```bash
-git clone https://github.com/your-repo/ddr5-ai-sandbox-simulator.git
-cd ddr5-ai-sandbox-simulator
+git clone https://github.com/your-repo/ddr5-ai-memory-tuner.git
+cd ddr5-ai-memory-tuner
 pip install -r requirements.txt
 python -m streamlit run src/web_interface/main.py --server.port 8521
 ```
@@ -55,8 +55,8 @@ Open `http://localhost:8521` in your browser.
 
 ### Setup
 ```bash
-git clone https://github.com/your-repo/ddr5-ai-sandbox-simulator.git
-cd ddr5-ai-sandbox-simulator
+git clone https://github.com/your-repo/ddr5-ai-memory-tuner.git
+cd ddr5-ai-memory-tuner
 pip install -r requirements.txt
 python -m streamlit run src/web_interface/main.py --server.port 8521
 ```
