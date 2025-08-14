@@ -150,6 +150,8 @@ bandit -r src/
 safety check
 ```
 
+See also: `docs/TESTING.md` for a concise testing guide.
+
 ---
 
 ## 🔒 Safety Features
