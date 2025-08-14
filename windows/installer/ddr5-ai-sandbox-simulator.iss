@@ -1,20 +1,20 @@
-; Inno Setup Script for DDR5 AI Sandbox Simulator
+; Inno Setup Script for DDR5 AI Memory Tuner
 ; Builds a per-user installer that extracts files to %LOCALAPPDATA% and runs the PowerShell installer
 
-#define MyAppName "DDR5 AI Sandbox Simulator"
+#define MyAppName "DDR5 AI Memory Tuner"
 #define MyAppVersion "6.0.0"
 #define MyAppPublisher "killerbotofthenewworld"
-#define MyAppExeName "DDR5 AI Sandbox Simulator"
+#define MyAppExeName "DDR5 AI Memory Tuner"
 
 [Setup]
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 AppPublisher={#MyAppPublisher}
-DefaultDirName={localappdata}\DDR5-AI-Sandbox-Simulator
+DefaultDirName={localappdata}\DDR5-AI-Memory-Tuner
 DisableDirPage=yes
 DisableProgramGroupPage=yes
 OutputDir=.
-OutputBaseFilename=DDR5-AI-Sandbox-Simulator-Setup
+OutputBaseFilename=DDR5-AI-Memory-Tuner-Setup
 Compression=lzma
 SolidCompression=yes
 PrivilegesRequired=lowest
@@ -41,6 +41,6 @@ Source: "..\\..\\windows\\README-windows.md"; DestDir: "{app}\\windows"; Flags: 
 Filename: "powershell.exe"; Parameters: "-ExecutionPolicy Bypass -File ""{app}\windows\install.ps1"""; StatusMsg: "Finalizing installation..."; Flags: runhidden
 
 [Icons]
-Name: "{userdesktop}\{#MyAppExeName}"; Filename: "{localappdata}\DDR5-AI-Sandbox-Simulator\run_ddr5_simulator.bat"
-Name: "{userprograms}\{#MyAppExeName}\{#MyAppExeName}"; Filename: "{localappdata}\DDR5-AI-Sandbox-Simulator\run_ddr5_simulator.bat"
-Name: "{userprograms}\{#MyAppExeName}\Uninstall {#MyAppExeName}"; Filename: "powershell.exe"; Parameters: "-ExecutionPolicy Bypass -File ""{localappdata}\DDR5-AI-Sandbox-Simulator\uninstall.ps1"""; IconFilename: "{sys}\imageres.dll"; IconIndex: 27
+Name: "{userdesktop}\{#MyAppExeName}"; Filename: "{localappdata}\DDR5-AI-Memory-Tuner\run_ddr5_simulator.bat"
+Name: "{userprograms}\{#MyAppExeName}\{#MyAppExeName}"; Filename: "{localappdata}\DDR5-AI-Memory-Tuner\run_ddr5_simulator.bat"
+Name: "{userprograms}\{#MyAppExeName}\Uninstall {#MyAppExeName}"; Filename: "powershell.exe"; Parameters: "-ExecutionPolicy Bypass -File ""{localappdata}\DDR5-AI-Memory-Tuner\uninstall.ps1"""; IconFilename: "{sys}\imageres.dll"; IconIndex: 27

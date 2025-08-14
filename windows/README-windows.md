@@ -1,10 +1,10 @@
-# DDR5 AI Sandbox Simulator – Windows Installation
+# DDR5 AI Memory Tuner – Windows Installation
 
 This provides a real Windows installer (no mocks).
 
 What it does:
 
-- Installs to `%LOCALAPPDATA%\DDR5-AI-Sandbox-Simulator`
+- Installs to `%LOCALAPPDATA%\DDR5-AI-Memory-Tuner`
 - Creates a Python virtual environment and installs dependencies from `requirements.txt`
 - Adds Start Menu and Desktop shortcuts to launch the app
 - Registers an uninstaller entry (per-user) in Add/Remove Programs
@@ -21,16 +21,16 @@ What it does:
 
 ## Run
 
-- Use the Desktop shortcut: "DDR5 AI Sandbox Simulator"
-- Or Start Menu: Programs > DDR5 AI Sandbox Simulator
-- Or run `%LOCALAPPDATA%\DDR5-AI-Sandbox-Simulator\run_ddr5_simulator.bat`
+- Use the Desktop shortcut: "DDR5 AI Memory Tuner"
+- Or Start Menu: Programs > DDR5 AI Memory Tuner
+- Or run `%LOCALAPPDATA%\DDR5-AI-Memory-Tuner\run_ddr5_simulator.bat`
 
 The app opens at: <http://localhost:8521>
 
 ## Uninstall
 
-- Open “Add or Remove Programs”, find "DDR5 AI Sandbox Simulator" and click Uninstall
-- Or run `%LOCALAPPDATA%\DDR5-AI-Sandbox-Simulator\uninstall.ps1` with PowerShell
+- Open “Add or Remove Programs”, find "DDR5 AI Memory Tuner" and click Uninstall
+- Or run `%LOCALAPPDATA%\DDR5-AI-Memory-Tuner\uninstall.ps1` with PowerShell
 
 ## Notes
 

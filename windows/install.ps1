@@ -1,8 +1,8 @@
 <#
-DDR5 AI Sandbox Simulator - Windows Installer (Real, no mocks)
+DDR5 AI Memory Tuner - Windows Installer (Real, no mocks)
 
 What this does:
-- Copies the app to %LOCALAPPDATA%\DDR5-AI-Sandbox-Simulator
+- Copies the app to %LOCALAPPDATA%\DDR5-AI-Memory-Tuner
 - Creates a Python virtual environment and installs requirements
 - Adds Start Menu and Desktop shortcuts
 - Registers an uninstaller entry in Add/Remove Programs (per-user)
@@ -19,7 +19,7 @@ Run (no admin required):
 
 [CmdletBinding(SupportsShouldProcess=$true)]
 param(
-    [string]$InstallDir = "$env:LOCALAPPDATA\DDR5-AI-Sandbox-Simulator",
+    [string]$InstallDir = "$env:LOCALAPPDATA\DDR5-AI-Memory-Tuner",
     [switch]$Force
 )
 
@@ -35,7 +35,7 @@ function Write-Err($msg){ Write-Host "[ERR ] $msg" -ForegroundColor Red }
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $RepoRoot = Resolve-Path (Join-Path $ScriptDir '..') | Select-Object -ExpandProperty Path
 
-Write-Host "🚀 DDR5 AI Sandbox Simulator - Windows Installer" -ForegroundColor Magenta
+Write-Host "🚀 DDR5 AI Memory Tuner - Windows Installer" -ForegroundColor Magenta
 Write-Host "====================================================="
 Write-Info "Repo: $RepoRoot"
 Write-Info "Install dir: $InstallDir"
@@ -137,7 +137,7 @@ $RunBat = Join-Path $InstallDir 'run_ddr5_simulator.bat'
 $batContent = @'
 @echo off
 setlocal enableextensions enabledelayedexpansion
-echo Launching DDR5 AI Sandbox Simulator...
+echo Launching DDR5 AI Memory Tuner...
 call "%~dp0venv\Scripts\activate.bat"
 echo Access at: http://localhost:8521
 streamlit run "%~dp0main.py" --server.port 8521
@@ -162,11 +162,11 @@ function New-Shortcut {
     $Shortcut.Save()
 }
 
-$StartMenuDir = Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs\DDR5 AI Sandbox Simulator'
+$StartMenuDir = Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs\DDR5 AI Memory Tuner'
 New-Item -ItemType Directory -Force -Path $StartMenuDir | Out-Null
 
-$DesktopLnk = Join-Path $env:USERPROFILE 'Desktop\DDR5 AI Sandbox Simulator.lnk'
-$StartLnk   = Join-Path $StartMenuDir 'DDR5 AI Sandbox Simulator.lnk'
+$DesktopLnk = Join-Path $env:USERPROFILE 'Desktop\DDR5 AI Memory Tuner.lnk'
+$StartLnk   = Join-Path $StartMenuDir 'DDR5 AI Memory Tuner.lnk'
 
 New-Shortcut -ShortcutPath $DesktopLnk -TargetPath $RunBat -WorkingDirectory $InstallDir
 New-Shortcut -ShortcutPath $StartLnk   -TargetPath $RunBat -WorkingDirectory $InstallDir
@@ -178,15 +178,15 @@ $unContent = @'
 param([switch]`$Silent)
 `$ErrorActionPreference = 'Continue'
 function Remove-Shortcut([string]`$path){ if (Test-Path `"`$path`") { Remove-Item -Force `"`$path`" } }
-Write-Host 'Uninstalling DDR5 AI Sandbox Simulator...'
+Write-Host 'Uninstalling DDR5 AI Memory Tuner...'
 try {
   # Remove Start Menu folder
-  `$startDir = Join-Path `$env:APPDATA 'Microsoft\Windows\Start Menu\Programs\DDR5 AI Sandbox Simulator'
+    `$startDir = Join-Path `$env:APPDATA 'Microsoft\Windows\Start Menu\Programs\DDR5 AI Memory Tuner'
   if (Test-Path `$startDir) { Remove-Item -Recurse -Force `$startDir }
   # Remove Desktop shortcut
-  Remove-Shortcut (Join-Path `$env:USERPROFILE 'Desktop\DDR5 AI Sandbox Simulator.lnk')
+    Remove-Shortcut (Join-Path `$env:USERPROFILE 'Desktop\DDR5 AI Memory Tuner.lnk')
   # Remove registry uninstall entry
-  Remove-Item -Recurse -Force 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\DDR5-AI-Sandbox-Simulator' -ErrorAction SilentlyContinue
+    Remove-Item -Recurse -Force 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\DDR5-AI-Memory-Tuner' -ErrorAction SilentlyContinue
   # Remove install dir
   `$root = Split-Path -Parent $MyInvocation.MyCommand.Path
   Set-Location `$env:TEMP
@@ -200,9 +200,9 @@ try {
 Set-Content -Path $UninstallPs1 -Value $unContent -Encoding UTF8
 
 # Per-user ARP entry
-$UninstallRegPath = 'HKCU:Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\DDR5-AI-Sandbox-Simulator'
+$UninstallRegPath = 'HKCU:Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\DDR5-AI-Memory-Tuner'
 New-Item -Path $UninstallRegPath -Force | Out-Null
-New-ItemProperty -Path $UninstallRegPath -Name 'DisplayName'     -Value 'DDR5 AI Sandbox Simulator' -PropertyType String -Force | Out-Null
+New-ItemProperty -Path $UninstallRegPath -Name 'DisplayName'     -Value 'DDR5 AI Memory Tuner' -PropertyType String -Force | Out-Null
 New-ItemProperty -Path $UninstallRegPath -Name 'Publisher'        -Value 'killerbotofthenewworld'    -PropertyType String -Force | Out-Null
 New-ItemProperty -Path $UninstallRegPath -Name 'DisplayVersion'   -Value '6.0.0'                     -PropertyType String -Force | Out-Null
 New-ItemProperty -Path $UninstallRegPath -Name 'InstallLocation'  -Value $InstallDir                  -PropertyType String -Force | Out-Null
@@ -212,11 +212,11 @@ New-ItemProperty -Path $UninstallRegPath -Name 'UninstallString'  -Value "powers
 Write-Ok "Registered uninstaller (per-user)"
 
 # Create Start Menu Uninstall shortcut
-$UninstallLnk = Join-Path $StartMenuDir 'Uninstall DDR5 AI Sandbox Simulator.lnk'
+$UninstallLnk = Join-Path $StartMenuDir 'Uninstall DDR5 AI Memory Tuner.lnk'
 $pwshExe = (Get-Command powershell.exe).Source
 New-Shortcut -ShortcutPath $UninstallLnk -TargetPath $pwshExe -Arguments "-ExecutionPolicy Bypass -File `"$UninstallPs1`"" -WorkingDirectory $InstallDir
 Write-Ok "Uninstall shortcut created"
 
 Write-Host "`n🎉 Installation complete!" -ForegroundColor Green
-Write-Host "Start from: Desktop or Start Menu > DDR5 AI Sandbox Simulator"
+Write-Host "Start from: Desktop or Start Menu > DDR5 AI Memory Tuner"
 Write-Host "Or run: $RunBat"

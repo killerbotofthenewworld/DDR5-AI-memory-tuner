@@ -54,7 +54,7 @@ try {
     Write-Err "ISCC exited with code $LASTEXITCODE"
     exit $LASTEXITCODE
   }
-  $out = Get-ChildItem -Path $ScriptDir -Filter 'DDR5-AI-Sandbox-Simulator-Setup*.exe' | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+  $out = Get-ChildItem -Path $ScriptDir -Filter 'DDR5-AI-Memory-Tuner-Setup*.exe' | Sort-Object LastWriteTime -Descending | Select-Object -First 1
   if ($out) {
     Write-Ok "Built: $($out.FullName)"
   } else {

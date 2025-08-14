@@ -5,8 +5,7 @@
 [![Version](https://img.shields.io/badge/version-6.0.0-blue.svg)](https://github.com/killerbotofthenewworld/ddr5-ai-sandbox-simulator/releases)
 [![CI](https://github.com/killerbotofthenewworld/ddr5-ai-sandbox-simulator/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/killerbotofthenewworld/ddr5-ai-sandbox-simulator/actions/workflows/ci-cd.yml)
 
-> **Professional AI-Powered DDR5 Memory Optimization Platform**  
-> Advanced memory tuning with artificial intelligence, real-time hardware integration, 3D visualizations, and comprehensive safety systems.
+> DDR5 AI memory tuner for safe timing optimization and performance simulation; Streamlit UI, Windows installer, JEDEC compliance.
 
 ---
 
@@ -37,8 +36,8 @@ Looking for docs? See the consolidated docs hub in `docs/` (index at `docs/READM
 
 Option A — EXE installer (recommended):
 
-- Download the Windows installer from Releases: DDR5-AI-Sandbox-Simulator-Setup.exe
-- Run the EXE (no admin required). It installs to `%LOCALAPPDATA%\DDR5-AI-Sandbox-Simulator`, sets up a venv, installs dependencies, and adds Start Menu/Desktop shortcuts.
+- Download the Windows installer from Releases: DDR5-AI-Memory-Tuner-Setup.exe
+- Run the EXE (no admin required). It installs to `%LOCALAPPDATA%\DDR5-AI-Memory-Tuner`, sets up a venv, installs dependencies, and adds Start Menu/Desktop shortcuts.
 
 Option B — Scripted install (from source):
 
@@ -48,8 +47,8 @@ Option B — Scripted install (from source):
 
 Launch options on Windows:
 
-- From Desktop/Start Menu shortcut “DDR5 AI Sandbox Simulator”, or
-- Run `%LOCALAPPDATA%\DDR5-AI-Sandbox-Simulator\run_ddr5_simulator.bat`
+- From Desktop/Start Menu shortcut “DDR5 AI Memory Tuner”, or
+- Run `%LOCALAPPDATA%\DDR5-AI-Memory-Tuner\run_ddr5_simulator.bat`
 
 ### From source (all platforms)
 
@@ -228,6 +227,16 @@ Your support helps fund:
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 🔎 Keywords (for discovery)
+
+- ddr5, ddr5-memory, ram, memory-tuning, overclocking, timing-optimization
+- ai, machine-learning, reinforcement-learning, genetic-algorithm, optuna
+- pytorch, scikit-learn, xgboost, lightgbm
+- jedec, hardware-detection, performance-tuning
+- streamlit, windows-installer, simulator, benchmark, optimization
 
 ---
 
