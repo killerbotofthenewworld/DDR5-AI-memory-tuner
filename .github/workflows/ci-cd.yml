@@ -163,7 +163,13 @@ jobs:
         labels: ${{ steps.meta.outputs.labels }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
-        platforms: linux/amd64,linux/arm64
+        # Use a single target platform to avoid cross-arch torch wheel issues in CI
+        platforms: linux/amd64
+        build-args: |
+          TORCH_INDEX_URL=https://download.pytorch.org/whl/cpu
+          TORCH_VERSION=2.3.1
+          TORCHVISION_VERSION=0.18.1
+          TORCHAUDIO_VERSION=2.3.1
 
   documentation:
     runs-on: ubuntu-latest

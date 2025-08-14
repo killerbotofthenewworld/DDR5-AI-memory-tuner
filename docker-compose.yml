@@ -7,10 +7,13 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8501:8501"
+    # Bind mount is optional; enable for live edits in dev
     volumes:
       - .:/app
-      - /dev/mem:/dev/mem:ro  # For hardware detection (requires privileged mode)
-    privileged: true  # Required for dmidecode hardware detection
+    # Hardware detection paths/privilege are not needed in most containers and can break CI
+    # Uncomment on local Linux hosts if you need dmidecode against host hardware
+    # - /dev/mem:/dev/mem:ro
+    # privileged: true
     environment:
       - STREAMLIT_SERVER_PORT=8501
       - STREAMLIT_SERVER_ADDRESS=0.0.0.0
