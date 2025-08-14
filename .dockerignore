@@ -1,0 +1,29 @@
+# Reduce build context size and avoid accidental secrets/binaries
+.git
+.github
+.azure
+.venv
+venv
+__pycache__
+*.pyc
+*.pyo
+
+# Tests and artifacts
+.tests
+pytest_cache
+.pytest_cache
+coverage.xml
+htmlcov
+
+# Local data/screenshots
+screenshots
+*.log
+logs
+
+# Windows installer outputs and installers
+windows/installer/*.exe
+
+# Dist/build outputs
+build
+site
+dist

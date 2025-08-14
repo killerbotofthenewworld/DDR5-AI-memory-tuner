@@ -128,6 +128,9 @@ jobs:
     needs: [test, security]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' || github.event_name == 'release'
+    permissions:
+      contents: read
+      packages: write
     
     steps:
     - uses: actions/checkout@v4
@@ -141,12 +144,12 @@ jobs:
         registry: ghcr.io
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
-    
     - name: Extract metadata
       id: meta
       uses: docker/metadata-action@v5
       with:
-        images: ghcr.io/${{ github.repository }}
+        # Force lowercase and a stable package name for GHCR
+        images: ghcr.io/${{ github.repository_owner }}/ddr5-ai-memory-tuner
         tags: |
           type=ref,event=branch
           type=ref,event=pr
