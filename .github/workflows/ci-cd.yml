@@ -53,9 +53,13 @@ jobs:
         mypy src/ || echo "⚠️ Type checking issues found - continuing pipeline"
       continue-on-error: true
     
+    - name: Show pytest and plugin versions
+      run: |
+        python -c "import pytest, sys; print('pytest', pytest.__version__, 'python', sys.version)"
+
     - name: Run tests with pytest (with coverage gate)
       run: |
-        pytest tests/ --cov=src --cov-config=.coveragerc --cov-report=xml --cov-report=term --cov-fail-under=80 -v
+        python -m pytest tests/ --cov --cov-config=.coveragerc --cov-report=xml --cov-report=term --cov-fail-under=80 -v
       continue-on-error: false
     
     - name: Upload coverage to Codecov

@@ -5,12 +5,11 @@ matplotlib>=3.5.0
 seaborn>=0.11.0
 streamlit>=1.20.0
 plotly>=5.0.0
-pydantic>=1.9.0
-pytest>=6.0.0
-black>=22.0.0
-flake8>=4.0.0
+# Pin to Pydantic v2 to match code usage
+pydantic>=2.8,<3
 
 # Advanced AI Dependencies
+# Use CPU wheels in CI via index override in Docker; default here
 torch>=2.0.0
 optuna>=3.0.0
 xgboost>=2.0.0
