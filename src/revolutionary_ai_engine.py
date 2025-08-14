@@ -19,6 +19,7 @@ from abc import ABC, abstractmethod
 import random
 from collections import deque
 import pickle
+from .utils.cache_utils import PredictionCache
 
 # Try to import advanced libraries
 try:
@@ -489,6 +490,11 @@ class RevolutionaryAIEngine:
         self.X_train = None
         self.y_train = None
         self.scaler = StandardScaler() if SKLEARN_AVAILABLE else None
+        # Lightweight on-disk cache for prediction fallbacks
+        try:
+            self._pred_cache = PredictionCache(namespace="revolutionary_ai")
+        except Exception:
+            self._pred_cache = None
     
     def initialize_training_data(self, num_samples: int = 1000):
         """Initialize synthetic training data for demonstration."""
@@ -972,8 +978,22 @@ class RevolutionaryAIEngine:
                     prediction = self.neural_network.model(features_tensor)
                     score = prediction.item()
             else:
-                # Fallback to simulation
-                score = self._simulate_performance_score(features)
+                # Fallback to simulation, with on-disk cache
+                cache_key_payload = {
+                    "features": features,
+                    "version": 1,
+                    "algo": "simulate_performance_score",
+                }
+                score = None
+                if self._pred_cache is not None:
+                    key = self._pred_cache.key_for(cache_key_payload)
+                    cached = self._pred_cache.get(key)
+                    if cached and isinstance(cached, dict) and "score" in cached:
+                        score = float(cached["score"])  # type: ignore[arg-type]
+                if score is None:
+                    score = self._simulate_performance_score(features)
+                    if self._pred_cache is not None:
+                        self._pred_cache.set(key, {"score": float(score)})
             
             return {
                 'performance_score': score,
@@ -982,7 +1002,6 @@ class RevolutionaryAIEngine:
                 'stability_score': min(100, score * 110),  # %
                 'confidence': 0.85 if self.is_trained else 0.65
             }
-        
         except Exception as e:
             print(f"Prediction error: {e}")
             return {

@@ -1,0 +1,14 @@
+[run]
+branch = True
+source = src
+
+[report]
+# Start strict coverage on the core, well-tested modules; expand weekly.
+include =
+    src/ai_optimizer.py
+    src/ddr5_simulator.py
+
+fail_under = 80
+show_missing = True
+skip_covered = False
+precision = 1
