@@ -5,6 +5,7 @@ This document outlines the comprehensive improvement plan for the DDR5 AI Memory
 <!-- Content migrated from COMPREHENSIVE_IMPROVEMENT_ROADMAP.md -->
 
 ## 📋 Overview
+
 This document outlines the comprehensive improvement plan for the DDR5 AI Sandbox Simulator, focusing on enhancing AI capabilities, testing, documentation, and user experience.
 
 ## 🛠️ 2025 Q3 Upgrade Execution Plan (Next 2 Weeks)
@@ -16,14 +17,14 @@ This section turns the roadmap into an actionable, time-bound plan. Dates assume
 - CI/CD and Quality Gates
     - [ ] Validate existing workflow at `.github/workflows/ci-cd.yml` and set required checks on PRs
     - [ ] Add local quality tooling: `.pre-commit-config.yaml`, `mypy.ini`, `.flake8` (align with CI)
-    - [ ] Introduce `requirements-dev.txt` (pytest, black, flake8, mypy, bandit, safety) and optional `constraints.txt`
-    - [ ] Enable coverage artifact upload and failing threshold in CI (soft-fail today → hard-fail >2 weeks)
+        - [ ] Introduce `requirements-dev.txt` (pytest, black, flake8, mypy, bandit, safety) and optional `constraints.txt`
+        - [ ] Enable coverage artifact upload and failing threshold in CI (soft-fail today → hard-fail >2 weeks)
 
 - Windows Installer (real, easy, robust)
     - [ ] Promote current per-user installer to a signed EXE via Inno Setup or NSIS (keeps venv layout)
     - [ ] Bundle an offline wheels cache for heavy deps (torch, torchvision, opencv) to reduce install flakiness
-    - [ ] Add a “Repair” option and better logs; ensure Start Menu/Uninstall entries are present and reliable
-    - [ ] Document code signing workflow and publish checksum in Releases
+        - [ ] Add a “Repair” option and better logs; ensure Start Menu/Uninstall entries are present and reliable
+        - [ ] Document code signing workflow and publish checksum in Releases
 
 Deliverables (end of Week 1):
 
@@ -33,24 +34,85 @@ Deliverables (end of Week 1):
 ### Week 2: Performance, Safety, and AI Quick Wins
 
 - Performance and Startup
-    - [ ] Profile cold start; lazy-import heavy modules; cache static datasets (e.g., databases under `src/`)
-    - [ ] Add a simple on-disk cache (joblib/pickle) for expensive computations; background warm-up task
+        - [ ] Profile cold start; lazy-import heavy modules; cache static datasets (e.g., databases under `src/`)
+        - [ ] Add a simple on-disk cache (joblib/pickle) for expensive computations; background warm-up task
 
 - Safety and Validation
-    - [ ] Extend JEDEC validation rules (clear messages; all primary timings covered)
-    - [ ] Make “Safe Mode” the default; add Dry-Run preflight for live changes; highlight violations in UI
+        - [ ] Extend JEDEC validation rules (clear messages; all primary timings covered)
+        - [ ] Make “Safe Mode” the default; add Dry-Run preflight for live changes; highlight violations in UI
 
 - AI Quick Wins (no API breaks)
     - [ ] Unify optimizer strategy behind a single interface (GA/RL/BO)
     - [ ] Add Pareto frontier view (bandwidth vs latency vs stability)
-    - [ ] Add basic SHAP/feature importance for the regression predictor
-    - [ ] Add uncertainty estimates and warm-start from known-good presets
+        - [ ] Add basic SHAP/feature importance for the regression predictor
+        - [ ] Add uncertainty estimates and warm-start from known-good presets
 
 Deliverables (end of Week 2):
 
 - Measured cold-start improvement and a brief PERF.md with before/after numbers
 - Safer defaults with preflight and clearer JEDEC violations
 - AI tab with Pareto view and model interpretability toggle
+
+## 🔝 Prioritized Improvements (Roadmap You Can Track)
+
+1. Release & Distribution
+
+- Ensure GHCR push works (enable org publishing or use PAT); publish immutable version tags and latest
+- Code-sign Windows installer; optionally publish to WinGet
+- Automate release notes and attach installer + SBOM artifacts
+
+1. CI/CD Hardening
+
+- Multi-arch images (amd64 now; arm64 when torch wheels available)
+- Add vulnerability scanning (Trivy/Grype) and Dependabot
+- Cache Python wheels in Docker builds; slim layers
+
+1. Testing & Validation
+
+- Add docs/TESTING.md with steps and sample outputs
+- Property tests for JEDEC invariants; optimizer determinism (seeded)
+- Streamlit import smoke test; performance regression thresholds
+- Mypy stricter checks on core modules
+
+1. AI/Optimizer Upgrades
+
+- Add Bayesian/Optuna tuner; early stopping by convergence
+- Reward shaping with explicit safety penalties for violations
+- Experiment tracking (MLflow/W&B) for metrics and artifacts
+- Warm-start search from known-good presets
+
+1. Product/UX
+
+- One-click “Safe Optimize”; guarded “Advanced” toggles
+- Profile save/load; JSON export; clearly mark simulated XMP export
+- Results dashboard with stability bands and baseline deltas
+- Guided tutorial integration and Quick Start for Windows
+
+1. Simulation/Performance
+
+- Vectorize hot paths; optional Numba
+- Memoize calculations and add thermal model parameters
+
+1. Security & Supply Chain
+
+- Generate SBOM (Syft) for Docker and installer
+- Sign images (cosign) and add provenance (SLSA/GitHub OIDC)
+- CI scanning with gating on severity thresholds
+
+## ⏱️ Immediate Actions (This Week)
+
+- Verify GHCR push (enable org publishing or switch to PAT login)
+- Add docs/TESTING.md and new tests:
+    - JEDEC invariants (property-based)
+    - Optimizer seeded determinism
+- Add a Quick Start to README (Windows installer usage)
+- Add release notes template and changelog generation
+
+## 30/60/90 Plan
+
+- 30: GHCR stable, tests expanded, Quick Start + Testing docs, automated release notes
+- 60: Optuna tuner, profile export/load, signed installer + SBOMs, basic image signing
+- 90: Multi-arch images, experiment tracking, perf optimizations, polished UX for safe/advanced flows
 
 ### Ownership, Risks, and Mitigations
 
